@@ -9,7 +9,7 @@ import java.util.Map;
 
 import mt.weibo.common.Utils;
 import mt.weibo.crawl.experiment.ExpUtils;
-import mt.weibo.crawl.experiment.aipx.Coordinates;
+import mt.weibo.model.Coordinates;
 import weibo4j.model.WeiboException;
 
 /**

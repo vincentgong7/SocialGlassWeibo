@@ -1,4 +1,4 @@
-package mt.weibo.crawl.experiment.aipx;
+package mt.weibo.model;
 
 public class Coordinates {
 	public String lat;
@@ -26,4 +26,9 @@ public class Coordinates {
 		this.radius = item.split(",")[2];
 		this.page = 0;
 	}
+	
+	public String toString(){
+		return lat + "," + longi + "," + radius + "," + page;
+	}
+	
 }

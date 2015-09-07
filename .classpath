@@ -16,5 +16,6 @@
 	<classpathentry kind="lib" path="lib/jna-4.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/jna-platform-4.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/json-lib.jar"/>
+	<classpathentry kind="lib" path="lib/commons-lang-2.6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

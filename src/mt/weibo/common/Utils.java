@@ -22,12 +22,7 @@ import weibo4j.org.json.JSONObject;
  */
 public class Utils {
 
-	public static String[] ACCESS_TOKEN = {
-//			"2.00owJ9cFkKE_IEbce3361c680qNh_x",
-//			"2.002bnvMC0AC7_J7e09e31a95VZiKRC",
-//			"2.002bnvMC7F_iCDa8e0d10b080xPTzE",
-//			"2.002bnvMCoNu6rD44e681008c3k4GAD",
-	};
+	public static String[] ACCESS_TOKEN = {};
 
 	public static final String RESOURCE_FOLDER = "resource/";
 	public static final String STORE_FOLDER = "store/";
@@ -43,11 +38,12 @@ public class Utils {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		System.out.println(Utils.getResourceFilePath());
-		for (int i = 0; i < 20; i++) {
-			// System.out.println(randomAccessToken());
-			randomAccessToken();
-		}
+//		System.out.println(Utils.getResourceFilePath());
+		System.out.println(Utils.getPath());
+//		for (int i = 0; i < 20; i++) {
+//			// System.out.println(randomAccessToken());
+//			randomAccessToken();
+//		}
 	}
 
 	// get the poiid from the annotation if it has
@@ -95,8 +91,8 @@ public class Utils {
 	}
 
 	public static int randomInt(int min, int max) {
-		
-		if(min == max){
+
+		if (min == max) {
 			return min;
 		}
 		// NOTE: Usually this should be a field rather than a method
@@ -183,19 +179,19 @@ public class Utils {
 			keysFrom = 0;
 			keysTo = ACCESS_TOKEN.length;
 		}
-		
+
 		int i = -1;
 		for (String key : ACCESS_TOKEN) {
 			i++;
-			if(i>=keysFrom && i<=keysTo){
+			if (i >= keysFrom && i <= keysTo) {
 				list.add(key);
 			}
 		}
 		return list;
 	}
-	
-	public static void setAccessTokenList(List<String> keys){
-		if(keys.size()>0){
+
+	public static void setAccessTokenList(List<String> keys) {
+		if (keys.size() > 0) {
 			ACCESS_TOKEN = new String[keys.size()];
 			ACCESS_TOKEN = keys.toArray(ACCESS_TOKEN);
 		}
@@ -204,8 +200,8 @@ public class Utils {
 	public static int getKeyID(String key) {
 		// TODO Auto-generated method stub
 		int i = 0;
-		for(String k : ACCESS_TOKEN){
-			if(key!=null && k.equals(key)){
+		for (String k : ACCESS_TOKEN) {
+			if (key != null && k.equals(key)) {
 				return i;
 			}
 			i++;

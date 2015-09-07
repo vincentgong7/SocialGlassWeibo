@@ -182,7 +182,6 @@ public class CrawlTool {
 	}
 
 	public static List<String> initUidList(String uidFileName) {
-		// TODO Auto-generated method stub
 		List<String> uidList = new ArrayList<String>();
 		try {
 			MyLineReader mlr = new MyLineReader(uidFileName);
@@ -194,20 +193,9 @@ public class CrawlTool {
 			}
 			mlr.close();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return uidList;
-	}
-
-	public static String getNextUid(List<String> uidList, String currentUid) {
-		// TODO Auto-generated method stub
-		int uidID = uidList.indexOf(currentUid);
-		uidID ++;
-		if(uidID<0 || uidID > uidList.size()){
-			uidID = 0;
-		}
-		return uidList.get(uidID);
 	}
 
 }

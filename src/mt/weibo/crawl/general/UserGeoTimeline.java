@@ -37,12 +37,12 @@ public class UserGeoTimeline {
 	private String uidFileName;
 	private List<String> uidList;
 	private int maxPageCount = 20;
-	private int count=50;
+	private int count = 50;
 
 	public static void main(String[] args) {
 		UserGeoTimeline ugt = new UserGeoTimeline();
-		// nuc.setup(args[0]);
-		ugt.setup("/config.txt");
+		ugt.setup(args[0]);
+//		ugt.setup("/userpost-config.txt");
 		ugt.process();
 	}
 
@@ -58,19 +58,16 @@ public class UserGeoTimeline {
 					+ waitTimeSecond + "s, or:" + waitTimeSecond / 60 + "m.");
 			CrawlTool.sleep(waitTimeSecond, this.logSign);
 		}
-		
+
 		// the variables and flags
 		String currentKey = "";
 		int page = 0;
 		String currentUid = "";
 		boolean isResultEmpty = false;
 		boolean isError = false;
-		
+
 		while (true) {
-			//init the flags
-			isResultEmpty = false;
-			isError = false;
-			
+
 			// check if it is time to stop
 			boolean stopCrawl = CrawlTool
 					.checkStopCrawlTime(this.stopCrawlTimeStamp);
@@ -80,59 +77,68 @@ public class UserGeoTimeline {
 				break;
 			}
 
-			//prepare the key
+			// prepare the key
 			currentKey = CrawlTool.getNextKey(keyList, currentKey);
-			
+
 			// prepare the uid, page, count
-			if(null==currentUid || "".equals(currentUid)){
-				currentUid = CrawlTool.getNextUid(uidList, currentUid);
-			}
-			if(isResultEmpty){
-				// empty result get, goto next id, page = 1
-				currentUid = CrawlTool.getNextUid(uidList, currentUid);
+			if (null == currentUid || "".equals(currentUid)) {
+				currentUid = getNextUid(uidList, currentUid);
 				page = 1;
-			}else{
+			}
+			if (isResultEmpty) {
+				// empty result get, goto next id, page = 1
+				currentUid = getNextUid(uidList, currentUid);
+				page = 1;
+			} else {
 				// try the same id and next page
 				page++;
 			}
-			
-			//prepare the parameter map
-			Map<String, String> map = getParaMap(currentUid, page, count);
 
+			// prepare the parameter map
+			Map<String, String> map = getParaMap(currentUid, page, count);
+			System.out.println(map.toString());
+			
 			// sleep interval
 			CrawlTool.sleep(this.interval, this.logSign);
 
 			// try to crawl
 			try {
-				String line = "uid=" + currentUid + ", page=" + page + ", count=" + count; 
-				ExpUtils.mylog(CrawlTool.splitFileNameByHour(logName),line );
+				String line = "uid=" + currentUid + ", page=" + page
+						+ ", count=" + count;
+				ExpUtils.mylog(CrawlTool.splitFileNameByHour(logName), line);
 
 				// try to get the data
 				String result = ExpUtils.crawlData(api, map, currentKey);
-//				result = StringEscapeUtils.unescapeJava(result);
+				// result = StringEscapeUtils.unescapeJava(result);
+
+				// init and set the flags
+				isResultEmpty = false;
+				isError = false;
 
 				if ("[]".equals(result)) {
 					isResultEmpty = true;
 				} else {
 					isResultEmpty = false;
 				}
-				
-				if(result.startsWith("{\"error\"")){
+
+				if (result.startsWith("{\"error\"")) {
 					isError = true;
-				}else{
+				} else {
 					isError = false;
 				}
-				
+
 				if (!isResultEmpty && !isError) {
 					ExpUtils.mylogJson(
 							CrawlTool.splitFileNameByHour(JsonlogName), result);
-				}else{
+				} else {
 					// something wrong
-					ExpUtils.mylog(CrawlTool.splitFileNameByHour(logName), result);
+					ExpUtils.mylog(CrawlTool.splitFileNameByHour(logName),
+							result);
 				}
 			} catch (WeiboException e) {
 				e.printStackTrace();
-				ExpUtils.mylog(CrawlTool.splitFileNameByHour(logName), e.getError());
+				ExpUtils.mylog(CrawlTool.splitFileNameByHour(logName),
+						e.getError());
 				continue;
 			}
 		}
@@ -183,10 +189,9 @@ public class UserGeoTimeline {
 				this.maxPageCount = Integer.valueOf(config
 						.getProperty("max_page_count"));
 			}
-			
-			if(config.containsKey("count")){
-				this.count = Integer.valueOf(config
-						.getProperty("count"));
+
+			if (config.containsKey("count")) {
+				this.count = Integer.valueOf(config.getProperty("count"));
 			}
 
 			// User ID file
@@ -211,5 +216,19 @@ public class UserGeoTimeline {
 				}
 			}
 		}
+	}
+	
+	public String getNextUid(List<String> uidList, String currentUid) {
+		int uidID = uidList.indexOf(currentUid);
+		int nextUidID;
+		nextUidID = uidID + 1;
+		if(nextUidID<0 || nextUidID >= uidList.size()){
+			nextUidID = 0;
+		}
+		if(uidID != nextUidID){
+			System.out.println("change uid.");
+			ExpUtils.mylog(CrawlTool.splitFileNameByHour(this.logName), this.logSign + " Change uid.");
+		}
+		return uidList.get(nextUidID);
 	}
 }

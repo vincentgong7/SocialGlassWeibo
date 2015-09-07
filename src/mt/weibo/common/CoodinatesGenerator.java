@@ -41,6 +41,13 @@ public class CoodinatesGenerator {
 	}
 
 	private void process() {
+		
+		if (this.R <= this.r) {// if the given R is shorter than r
+			Coordinate coord = new Coordinate(this.lat, this.longi, this.R);
+			this.list.add(coord);
+			return;
+		}
+		
 		CircleCalculator cc = new CircleCalculator(R, r, interval);
 		List<Coord> basicCoordsList = cc.process();
 		for (Coord c : basicCoordsList) {

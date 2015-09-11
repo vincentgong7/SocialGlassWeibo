@@ -65,6 +65,7 @@ public class User extends WeiboResponse {
 	private boolean geo_enabled = false;							//是否开启了geo
 	private double lat = 0d;										//坐标
 	private double lon = 0d;									//坐标
+	private String jsonString;									//json string
 	//---------
 	private boolean following;            //保留字段,是否已关注(此特性暂不支持)
 	private boolean verified;             //加V标示，是否微博认证用户
@@ -141,6 +142,12 @@ public class User extends WeiboResponse {
 	}
 	public void setCreatedAt_origin(String createdAt_origin) {
 		this.createdAt_origin = createdAt_origin;
+	}
+	public String getJsonString() {
+		return jsonString;
+	}
+	public void setJsonString(String jsonString) {
+		this.jsonString = jsonString;
 	}
 	//------------
 	public void setFollowing(boolean following) {
@@ -257,6 +264,7 @@ public class User extends WeiboResponse {
 				createdAt = parseDate(json.getString("created_at"), "EEE MMM dd HH:mm:ss z yyyy");
 				//added by Vincent-------
 				createdAt_origin = json.getString("created_at");
+				jsonString = json.toString();
 				//----------
 				following = getBoolean("following", json);
 				verified = getBoolean("verified", json);

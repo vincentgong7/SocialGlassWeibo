@@ -103,14 +103,15 @@ public class StatusDB {
 		String insertTableSQL = "INSERT INTO "+this.userTableName
 				+ "(user_id, created_at, createdat_origin, screen_name, name, province, city, location, description, blog_url, "
 				+ "profile_image_url, user_domain, gender, followers_count, friends_count, statuses_count, favourites_count, verified, verified_type, is_allow_all_act_msg, "
-				+ "is_allow_all_comment, avatar_large, online_status, bi_followers_count, remark, lang, verified_reason, weihao"
+				+ "is_allow_all_comment, avatar_large, online_status, bi_followers_count, remark, lang, verified_reason, weihao,"
 				// + ", location_country, location_province, location_city"
 				// todo: get below items from face++
 				// + ", age, age_range, "
 				// +
 				// "gender_detected, glasses, ethnicity, smiling_detected, radius_of_gyration"
+				+ "json"
 				+ ") VALUES"
-				+ "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+				+ "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 		try {
 			// analyze the location
@@ -160,7 +161,9 @@ public class StatusDB {
 			// preparedStatement.setString(1, user);
 			// preparedStatement.setString(1, user);
 			// preparedStatement.setString(1, user);
-
+			
+			preparedStatement.setString(29, user.getJsonString());
+			
 			// execute insert SQL stetement
 			preparedStatement.executeUpdate();
 			preparedStatement.close();
@@ -179,8 +182,10 @@ public class StatusDB {
 				+ "(status_id, user_id, created_at, createdat_origin, weibo_id, content, source, is_favorited, is_truncated, in_reply_to_status_id, in_reply_to_user_id, in_reply_to_screen_name, "
 				+ "thumbnail_pic, bmiddle_pic, original_pic, retweeted_status, geo, latitude, longitude, reposts_count, comments_count, annotations"
 				// + ", poiid"
-				+ ", createat_timestamp) VALUES"
-				+ "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+				+ ", createat_timestamp,"
+				+ "json"
+				+ ") VALUES"
+				+ "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 		try {
 			String retweetedStatus = "";
@@ -219,6 +224,9 @@ public class StatusDB {
 //					Utils.parsePoiid(st.getAnnotations()));
 			preparedStatement.setLong(23,
 					Utils.getUnixTimeStamp(st.getCreatedAt_origin()));
+			
+			preparedStatement.setString(24, st.getJsonString());
+			
 			// execute insert SQL stetement
 			preparedStatement.executeUpdate();
 			preparedStatement.close();

@@ -22,6 +22,7 @@ public class Status extends WeiboResponse {
 	//---------
 	private String createdAt_origin;					//原始时间
 	private int deleted=0;								//is deleted? 1=yes or 0=no
+	private String jsonString;							//json string
 	//---------
 	private String id;                                   //status id
 	private String mid;                                  //微博MID
@@ -63,6 +64,7 @@ public class Status extends WeiboResponse {
 			if(json.has("deleted")){
 				deleted = json.getInt("deleted");
 			}
+			jsonString = json.toString();
 			//added
 			id = json.getString("id");
 			mid=json.getString("mid");
@@ -303,6 +305,12 @@ public class Status extends WeiboResponse {
 	}
 	public boolean isDeleted(){// if this post has been deleted
 		return this.deleted == 1;
+	}
+	public String getJsonString() {
+		return jsonString;
+	}
+	public void setJsonString(String jsonString) {
+		this.jsonString = jsonString;
 	}
 	//-----------
 	public static StatusWapper constructWapperStatus(Response res) throws WeiboException {

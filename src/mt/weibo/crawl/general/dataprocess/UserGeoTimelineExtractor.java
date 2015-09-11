@@ -47,9 +47,9 @@ public class UserGeoTimelineExtractor {
 				String line = mlr.nextLine().trim();
 				List<Status> statusList = StatusDB.getStatusList(line);
 				
-				System.out.println(line);
+				//System.out.println(line);
 				Status s = statusList.get(0);
-				System.out.println(s);
+				//System.out.println(s);
 
 				// insert one-line-status into Status table
 				StatusDB sdb = new StatusDB(this.url, this.username,

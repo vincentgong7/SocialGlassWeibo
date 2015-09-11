@@ -3,7 +3,10 @@ package weibo4j.model;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import mt.weibo.common.MyLineWriter;
 import weibo4j.http.Response;
 import weibo4j.org.json.JSONArray;
 import weibo4j.org.json.JSONException;
@@ -85,9 +88,11 @@ public class Status extends WeiboResponse {
 				retweetedStatus= new Status(json.getJSONObject("retweeted_status"));
 			}
 			mlevel = json.getInt("mlevel");
-			geo= json.getString("geo");
-			if(geo!=null &&!"".equals(geo) &&!"null".equals(geo)){
-				getGeoInfo(geo);
+			if(!json.getString("geo").isEmpty()){
+				geo= json.getString("geo");
+				if(geo!=null &&!"".equals(geo) &&!"null".equals(geo)){
+					getGeoInfo(geo);
+				}
 			}
 			if(!json.isNull("visible")){
 				visible= new Visible(json.getJSONObject("visible"));
@@ -98,6 +103,7 @@ public class Status extends WeiboResponse {
 	}
 
 	private void getGeoInfo(String geo) {
+		/*
 		StringBuffer value= new StringBuffer();
 		for(char c:geo.toCharArray()){
 			if(c>45&&c<58){
@@ -111,6 +117,18 @@ public class Status extends WeiboResponse {
 			}
 		}
 		longitude=Double.parseDouble(value.toString());
+		*/
+		
+		String pattern = "[0-9]+\\.{0,1}[0-9]*,[0-9]+\\.{0,1}[0-9]*";
+		Pattern r = Pattern.compile(pattern);
+		Matcher m = r.matcher(geo);
+		if (m.find()) {
+			if(m.groupCount()>=0){
+				String[] coord = m.group(0).split(",");
+				latitude = Double.parseDouble(coord[0]);
+				longitude=Double.parseDouble(coord[1]);
+			}
+		}
 	}
 
 

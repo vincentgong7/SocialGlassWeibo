@@ -62,7 +62,6 @@ public class UserDB {
 			}
 			return userList;
 		} catch (WeiboException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return userList;

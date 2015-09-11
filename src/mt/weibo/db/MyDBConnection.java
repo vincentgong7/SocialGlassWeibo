@@ -36,6 +36,13 @@ public class MyDBConnection {
 		init();
 	}
 
+	public MyDBConnection(String url, String user, String password) {
+		this.url = url;
+		this.user = user;
+		this.password = password;
+		init();
+	}
+	
 	public void init() {
 		try {
 			if(con == null){

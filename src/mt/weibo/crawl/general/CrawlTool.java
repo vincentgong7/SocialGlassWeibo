@@ -181,12 +181,23 @@ public class CrawlTool {
 		return result;
 	}
 
-	public static List<String> initUidList(String uidFileName) {
+	public static List<String> initUidList(String uidFileName, String startingUid) {
 		List<String> uidList = new ArrayList<String>();
 		try {
 			MyLineReader mlr = new MyLineReader(uidFileName);
+			
+			if(null!=startingUid && !"".equals(startingUid)){// if starting from certain uid
+				while(mlr.hasNextLine()){
+					String uid = mlr.nextLine().trim();
+					if(uid.equals(startingUid)){
+						uidList.add(uid);
+						break;
+					}
+				}
+			}
+			
 			while (mlr.hasNextLine()) {
-				String uid = mlr.nextLine();
+				String uid = mlr.nextLine().trim();
 				if ("" != uid && !"".equals(uid)) {
 					uidList.add(uid);
 				}

@@ -120,18 +120,7 @@ public class NearbyUserStepOne {
 
 	}
 
-	/**
-	 * 获取某个位置周边的动态
-	 * 
-	 * @param map
-	 *            参数列表
-	 * @return
-	 * @throws WeiboException
-	 *             when Weibo service or network is unavailable
-	 * @version weibo4j-V2 1.0.2
-	 * @see http://open.weibo.com/wiki/2/place/nearby_timeline
-	 * @since JDK 1.5
-	 */
+
 	public static List<UserJson> nearbyUser(String json) {
 
 		List<UserJson> userList = new ArrayList<UserJson>();

@@ -5,13 +5,18 @@ package mt.weibo.db;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import mt.weibo.common.LocationSeparator;
 import mt.weibo.common.Utils;
 import weibo4j.model.Status;
+import weibo4j.model.StatusWapper;
 import weibo4j.model.User;
+import weibo4j.model.WeiboException;
+import weibo4j.org.json.JSONArray;
+import weibo4j.org.json.JSONException;
+import weibo4j.org.json.JSONObject;
 
 /**
  * @author vincentgong
@@ -20,9 +25,23 @@ import weibo4j.model.User;
 public class StatusDB {
 
 	private MyDBConnection mdbc;
+	private String userTableName = "socialmedia.user";
+	private String statusTableName = "socialmedia.post";
 
 	public StatusDB() {
 		this.mdbc = new MyDBConnection();
+		this.mdbc.init();
+	}
+	
+	public StatusDB(String url, String user, String password) {
+		this.mdbc = new MyDBConnection(url, user, password);
+		this.mdbc.init();
+	}
+	
+	public StatusDB(String url, String user, String password, String userTableName, String statusTableName) {
+		this.userTableName = userTableName;
+		this.statusTableName = statusTableName;
+		this.mdbc = new MyDBConnection(url, user, password);
 		this.mdbc.init();
 	}
 
@@ -43,27 +62,45 @@ public class StatusDB {
 		Iterator<Status> it = statusList.iterator();
 		while (it.hasNext()) {
 			Status st = it.next();
-			User user = st.getUser();
-			InsertUser(user);
+			if(!st.isDeleted()){
+				User user = st.getUser();
+				InsertUser(user);
+			}
 		}
 	}
 
-	public void insertStatusWithUser(Status st) {
-		InsertStatus(st);
-		InsertUser(st.getUser());
+	public void insertUserOnlyOnceFromStatusList(List<Status> statusList){
+		Iterator<Status> it = statusList.iterator();
+		while (it.hasNext()) {
+			Status st = it.next();
+			if(!st.isDeleted()){
+				User user = st.getUser();
+				InsertUser(user);
+				return;
+			}
+		}
 	}
-
+	
 	public void insertStatusList(List<Status> statusList) {
 		Iterator<Status> it = statusList.iterator();
 		while (it.hasNext()) {
 			Status st = it.next();
-			InsertStatus(st);
+			if(!st.isDeleted()){
+				InsertStatus(st);
+			}
 		}
 	}
 
-	public void InsertUser(User user) {
+	public void insertStatusWithUser(Status st) {
+		if(!st.isDeleted()){
+			InsertStatus(st);
+			InsertUser(st.getUser());
+		}
+	}
+	
+	private void InsertUser(User user) {
 		PreparedStatement preparedStatement = null;
-		String insertTableSQL = "INSERT INTO socialmedia.user"
+		String insertTableSQL = "INSERT INTO "+this.userTableName
 				+ "(user_id, created_at, createdat_origin, screen_name, name, province, city, location, description, blog_url, "
 				+ "profile_image_url, user_domain, gender, followers_count, friends_count, statuses_count, favourites_count, verified, verified_type, is_allow_all_act_msg, "
 				+ "is_allow_all_comment, avatar_large, online_status, bi_followers_count, remark, lang, verified_reason, weihao"
@@ -136,9 +173,9 @@ public class StatusDB {
 
 	}
 
-	public void InsertStatus(Status st) {
+	private void InsertStatus(Status st) {
 		PreparedStatement preparedStatement = null;
-		String insertTableSQL = "INSERT INTO socialmedia.post"
+		String insertTableSQL = "INSERT INTO " + this.statusTableName
 				+ "(status_id, user_id, created_at, createdat_origin, weibo_id, content, source, is_favorited, is_truncated, in_reply_to_status_id, in_reply_to_user_id, in_reply_to_screen_name, "
 				+ "thumbnail_pic, bmiddle_pic, original_pic, retweeted_status, geo, latitude, longitude, reposts_count, comments_count, annotations"
 				// + ", poiid"
@@ -195,5 +232,47 @@ public class StatusDB {
 
 	public void close() {
 		this.mdbc.close();
+	}
+	
+	// get the StatusWapper from status json
+	public static StatusWapper constructWapperStatus(String statusJson) throws WeiboException {
+		JSONObject jsonStatus;
+		JSONArray statuses = null;
+		try {
+			jsonStatus = new JSONObject(statusJson);
+			if(!jsonStatus.isNull("statuses")){				
+				statuses = jsonStatus.getJSONArray("statuses");
+			}
+			if(!jsonStatus.isNull("reposts")){
+				statuses = jsonStatus.getJSONArray("reposts");
+			}
+			int size = statuses.length();
+			List<Status> status = new ArrayList<Status>(size);
+			for (int i = 0; i < size; i++) {
+				status.add(new Status(statuses.getJSONObject(i)));
+			}
+			long previousCursor = jsonStatus.getLong("previous_curosr");
+			long nextCursor = jsonStatus.getLong("next_cursor");
+			long totalNumber = jsonStatus.getLong("total_number");
+			String hasvisible = jsonStatus.getString("hasvisible");
+			return new StatusWapper(status, previousCursor, nextCursor,totalNumber,hasvisible);
+		} catch (JSONException jsone) {
+			throw new WeiboException(jsone);
+		}
+	}
+	
+	// get the status list from status json
+	public static List<Status> getStatusList(String json){
+		List<Status> statusList = new ArrayList<Status>();
+		StatusWapper sw;
+		try {
+			if(json != null && !json.equals("")){
+				sw = constructWapperStatus(json);
+				statusList = sw.getStatuses();
+			}
+		} catch (WeiboException e) {
+			e.printStackTrace();
+		}
+		return statusList;
 	}
 }

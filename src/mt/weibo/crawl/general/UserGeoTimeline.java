@@ -36,6 +36,7 @@ public class UserGeoTimeline {
 	// user id
 	private String uidFileName;
 	private List<String> uidList;
+	private String startingUid = "";
 	private int maxPageCount = 20;
 	private int count = 50;
 
@@ -82,13 +83,27 @@ public class UserGeoTimeline {
 
 			// prepare the uid, page, count
 			if (null == currentUid || "".equals(currentUid)) {
-				currentUid = getNextUid(uidList, currentUid);
+				currentUid = getNextUidTillEnd(currentUid);
+				
+				if(currentUid=="finish" || "finish".equals(currentUid)){// all uids have been crawled
+					String line = "All uids have been crawled, now finish! " + new Date();
+					System.out.println(line);
+					ExpUtils.mylog(CrawlTool.splitFileNameByHour(logName), line);
+					break;
+				}
 				page = 1;
 			}
 			if (isResultEmpty) {
 				// empty result get, goto next id, page = 1
-				currentUid = getNextUid(uidList, currentUid);
+				currentUid = getNextUidTillEnd(currentUid);
 				page = 1;
+				
+				if(currentUid=="finish" || "finish".equals(currentUid)){// all uids have been crawled
+					String line = "All uids have been crawled, now finish! " + new Date();
+					System.out.println(line);
+					ExpUtils.mylog(CrawlTool.splitFileNameByHour(logName), line);
+					break;
+				}
 			} else {
 				// try the same id and next page
 				page++;
@@ -196,12 +211,15 @@ public class UserGeoTimeline {
 
 			// User ID file
 			this.uidFileName = config.getProperty("uid_file_name");
+			if(config.containsKey("start_uid")){// uid starting point
+				this.startingUid = config.getProperty("start_uid");
+			}
 
-			// init the appkey, coordinate
+			// init the appkey, uid
 			this.keyList = CrawlTool.initAppkey(Utils.getPath() + "/"
 					+ this.keyFileName, this.keysFrom, this.keysTo);
 			this.uidList = CrawlTool.initUidList(Utils.getPath() + "/"
-					+ this.uidFileName);
+					+ this.uidFileName, this.startingUid);
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -218,12 +236,15 @@ public class UserGeoTimeline {
 		}
 	}
 	
-	public String getNextUid(List<String> uidList, String currentUid) {
+	public String getNextUidTillEnd(String currentUid) {
 		int uidID = uidList.indexOf(currentUid);
 		int nextUidID;
 		nextUidID = uidID + 1;
-		if(nextUidID<0 || nextUidID >= uidList.size()){
+		if(nextUidID<0){
 			nextUidID = 0;
+		}
+		if(nextUidID >= this.uidList.size()){
+			return "finish";
 		}
 		if(uidID != nextUidID){
 			System.out.println("change uid.");
@@ -231,4 +252,5 @@ public class UserGeoTimeline {
 		}
 		return uidList.get(nextUidID);
 	}
+	
 }

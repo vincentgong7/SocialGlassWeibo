@@ -52,18 +52,13 @@ public class UserDB {
 		}
 	}
 
-	public static List<User> getUserList(String json) {
+	public static List<User> getUserList(String json) throws WeiboException {
 		List<User> userList = new ArrayList<User>();
 		UserWapper uw;
-		try {
 			if(json != null && !json.equals("")){
 				uw = constructWapperUsers(json);
 				userList = uw.getUsers();
 			}
-			return userList;
-		} catch (WeiboException e) {
-			e.printStackTrace();
-		}
 		return userList;
 	}
 

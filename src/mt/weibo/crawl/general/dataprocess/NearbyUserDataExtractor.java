@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import weibo4j.model.User;
+import weibo4j.model.WeiboException;
 import mt.weibo.common.MyLineReader;
 import mt.weibo.common.MyLineWriter;
 import mt.weibo.db.UserDB;
@@ -63,8 +64,9 @@ public class NearbyUserDataExtractor {
 				List<User> list;
 				try {
 					list = UserDB.getUserList(jsonLine);
-				} catch (Exception e) {
-					e.printStackTrace();
+				} catch (WeiboException we) {
+					System.out.println("Error in constructing user object.");
+					we.printStackTrace();
 					System.out.println(jsonLine);
 					continue;
 				}

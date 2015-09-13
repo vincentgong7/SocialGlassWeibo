@@ -270,17 +270,13 @@ public class StatusDB {
 	}
 	
 	// get the status list from status json
-	public static List<Status> getStatusList(String json){
+	public static List<Status> getStatusList(String json) throws WeiboException{
 		List<Status> statusList = new ArrayList<Status>();
 		StatusWapper sw;
-		try {
 			if(json != null && !json.equals("")){
 				sw = constructWapperStatus(json);
 				statusList = sw.getStatuses();
 			}
-		} catch (WeiboException e) {
-			e.printStackTrace();
-		}
 		return statusList;
 	}
 }

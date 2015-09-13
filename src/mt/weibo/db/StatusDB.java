@@ -170,8 +170,8 @@ public class StatusDB {
 			System.out.println(user.getCreatedAt_origin() + " "
 					+ user.getScreenName() + " " + user.getDescription());
 		} catch (SQLException e) {
-			System.out.println("Something wrong when writing the post to DB.");
-			e.printStackTrace();
+			System.err.println("Something wrong when writing the post to DB.");
+			System.err.println(e.getMessage());
 		}
 
 	}
@@ -232,8 +232,8 @@ public class StatusDB {
 			preparedStatement.close();
 			System.out.println(st.getCreatedAt_origin() + " " + st.getText());
 		} catch (SQLException e) {
-			System.out.println("Something wrong when writing the post to DB.");
-			e.printStackTrace();
+			System.err.println("Something wrong when writing the post to DB.");
+			System.err.println(e.getMessage());
 		}
 
 	}

@@ -23,6 +23,7 @@ public class Status extends WeiboResponse {
 	private String createdAt_origin;					//原始时间
 	private int deleted=0;								//is deleted? 1=yes or 0=no
 	private String jsonString;							//json string
+	private String poiid = "";
 	//---------
 	private String id;                                   //status id
 	private String mid;                                  //微博MID
@@ -84,6 +85,13 @@ public class Status extends WeiboResponse {
 			repostsCount = json.getInt("reposts_count");
 			commentsCount = json.getInt("comments_count");
 			annotations = json.getString("annotations");
+			//----added by Vincent
+			if(annotations!=null && !"".equals(annotations)){
+				if(annotations.contains("poiid")){// parse the poiid if it is there
+					getPoiidInfo(annotations);
+				}
+			}
+			//----
 			if(!json.isNull("user"))
 				user = new User(json.getJSONObject("user"));
 			if(!json.isNull("retweeted_status")){
@@ -104,6 +112,21 @@ public class Status extends WeiboResponse {
 		}
 	}
 
+	private void getPoiidInfo(String annoText) {
+		String pattern = "\"poiid\":\"[0-9A-Z]*\"";
+		Pattern r = Pattern.compile(pattern);
+		Matcher m = r.matcher(annoText);
+		if(m.find()){
+			if(m.groupCount()>=0){
+				String[] poiStrArray = m.group(0).trim().split(":");
+				if(poiStrArray.length>1){
+					String poiidStr = poiStrArray[1]; //"B2094652DB6BA4FA4799"
+					poiid = poiidStr.substring(1, poiidStr.length()-2);
+				}
+			}
+		}
+	}
+	
 	private void getGeoInfo(String geo) {
 		/*
 		StringBuffer value= new StringBuffer();
@@ -311,6 +334,12 @@ public class Status extends WeiboResponse {
 	}
 	public void setJsonString(String jsonString) {
 		this.jsonString = jsonString;
+	}
+	public String getPoiid() {
+		return poiid;
+	}
+	public void setPoiid(String poiid) {
+		this.poiid = poiid;
 	}
 	//-----------
 	public static StatusWapper constructWapperStatus(Response res) throws WeiboException {

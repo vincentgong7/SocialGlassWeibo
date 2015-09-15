@@ -181,11 +181,11 @@ public class StatusDB {
 		String insertTableSQL = "INSERT INTO " + this.statusTableName
 				+ "(status_id, user_id, created_at, createdat_origin, weibo_id, content, source, is_favorited, is_truncated, in_reply_to_status_id, in_reply_to_user_id, in_reply_to_screen_name, "
 				+ "thumbnail_pic, bmiddle_pic, original_pic, retweeted_status, geo, latitude, longitude, reposts_count, comments_count, annotations"
-				// + ", poiid"
 				+ ", createat_timestamp,"
+				+ "poiid,"
 				+ "json"
 				+ ") VALUES"
-				+ "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+				+ "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 		try {
 			String retweetedStatus = "";
@@ -220,12 +220,12 @@ public class StatusDB {
 			preparedStatement.setInt(20, st.getRepostsCount());
 			preparedStatement.setInt(21, st.getCommentsCount());
 			preparedStatement.setString(22, st.getAnnotations());
-//			preparedStatement.setString(23,
-//					Utils.parsePoiid(st.getAnnotations()));
 			preparedStatement.setLong(23,
 					Utils.getUnixTimeStamp(st.getCreatedAt_origin()));
-			
-			preparedStatement.setString(24, st.getJsonString());
+			preparedStatement.setString(24,
+					Utils.parsePoiid(st.getPoiid()));
+			preparedStatement.setString(25, st.getJsonString());
+
 			
 			// execute insert SQL stetement
 			preparedStatement.executeUpdate();

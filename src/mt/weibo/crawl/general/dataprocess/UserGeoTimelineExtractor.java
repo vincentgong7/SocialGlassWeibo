@@ -6,6 +6,7 @@ import java.util.List;
 import weibo4j.model.Status;
 import weibo4j.model.WeiboException;
 import mt.weibo.common.MyLineReader;
+import mt.weibo.common.MyLineWriter;
 import mt.weibo.db.StatusDB;
 
 public class UserGeoTimelineExtractor {
@@ -51,15 +52,18 @@ public class UserGeoTimelineExtractor {
 				try {
 					statusList = StatusDB.getStatusList(line);
 				} catch (WeiboException we) {
-					System.out.println("Error in constructing status list for one line.");
+					System.out
+							.println("Error in constructing status list for one line.");
 					we.printStackTrace();
 					continue;
 				}
 				// System.out.println(line);
-				Status s = statusList.get(0);
+				// Status s = statusList.get(0);
 				// System.out.println(s);
 
 				// insert one-line-status into Status table
+//				extractPOIinfo(statusList);
+				
 				StatusDB sdb = new StatusDB(this.url, this.username,
 						this.password, this.userTableName, this.postTableName);
 				sdb.insertStatusList(statusList); // insert the statuses into
@@ -77,6 +81,26 @@ public class UserGeoTimelineExtractor {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+
+	private void extractPOIinfo(List<Status> statusList) {
+		for(Status s: statusList){
+//			String line = s.getAnnotations();
+//			if(!line.contains("poiid")){
+//				continue;
+//			}
+			String line = s.getPoiid();
+			if("".equals(line)){
+				continue;
+			}
+			try {
+				MyLineWriter.getInstance().writeLine("/Users/vincentgong/Documents/TUD/Master TUD/A Master Thesis/share/IPX/2zhen/crawldata/mylog-workdesk/userpost-sep10/json/post-json-2015090817-poiid.txt", s.getAnnotations());
+				MyLineWriter.getInstance().writeLine("/Users/vincentgong/Documents/TUD/Master TUD/A Master Thesis/share/IPX/2zhen/crawldata/mylog-workdesk/userpost-sep10/json/post-json-2015090817-poiid.txt", line);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import mt.weibo.common.LocationSeparator;
 import mt.weibo.common.Utils;
 import weibo4j.model.Status;
 import weibo4j.model.StatusWapper;
@@ -106,18 +107,15 @@ public class StatusDB {
 				+ "(user_id, created_at, createdat_origin, screen_name, name, province, city, location, description, blog_url, "
 				+ "profile_image_url, user_domain, gender, followers_count, friends_count, statuses_count, favourites_count, verified, verified_type, is_allow_all_act_msg, "
 				+ "is_allow_all_comment, avatar_large, online_status, bi_followers_count, remark, lang, verified_reason, weihao,"
-				// + ", location_country, location_province, location_city"
+				+ ", location_country, location_province, location_city, lcation_region, "
 				// todo: get below items from face++
 				// + ", age, age_range, "
 				// +
 				// "gender_detected, glasses, ethnicity, smiling_detected, radius_of_gyration"
 				+ "json" + ") VALUES"
-				+ "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+				+ "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 		try {
-			// analyze the location
-			// LocationSeparator ls = new LocationSeparator(user.getLocation());
-
 			preparedStatement = mdbc.getPrepareStatement(insertTableSQL);
 			preparedStatement.setString(1, user.getId());
 			preparedStatement.setString(2, user.getCreatedAt().toString());
@@ -149,9 +147,14 @@ public class StatusDB {
 			preparedStatement.setString(26, user.getLang());
 			preparedStatement.setString(27, user.getVerifiedReason());
 			preparedStatement.setString(28, user.getWeihao());
-			// preparedStatement.setString(29, ls.getCountry());
-			// preparedStatement.setString(30, ls.getProvince());
-			// preparedStatement.setString(31, ls.getCity());
+			
+			// analyze the location
+			 LocationSeparator ls = new LocationSeparator(user.getLocation());
+			preparedStatement.setString(29, ls.getCountry());
+			preparedStatement.setString(30, ls.getProvince());
+			preparedStatement.setString(31, ls.getCity());
+			preparedStatement.setString(32, ls.getRegion());
+			
 			// (age, age_range,gender_detected, glasses, ethnicity,
 			// smiling_detected, radius_of_gyration) from face++
 			// preparedStatement.setString(1, user.);
@@ -163,7 +166,7 @@ public class StatusDB {
 			// preparedStatement.setString(1, user);
 			// preparedStatement.setString(1, user);
 
-			preparedStatement.setString(29, user.getJsonString());
+			preparedStatement.setString(33, user.getJsonString());
 
 			// execute insert SQL stetement
 			preparedStatement.executeUpdate();

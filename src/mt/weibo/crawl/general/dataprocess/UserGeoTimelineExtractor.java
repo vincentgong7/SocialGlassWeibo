@@ -21,7 +21,8 @@ public class UserGeoTimelineExtractor {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		UserGeoTimelineExtractor upe = new UserGeoTimelineExtractor();
-		upe.setInputFolderOrFile("/Users/vincentgong/Documents/TUD/Master TUD/A Master Thesis/share/IPX/2zhen/crawldata/mylog-workdesk/userpost-sep10/json/post-json-2015090817.txt");
+		upe.setInputFolderOrFile("D:/documents/Dropbox/TUD/Master TUD/A Master Thesis/share/IPX/2ndZhen/crawldata/mylog-workstation/mylog2015sep-Userpost/json/post-json-2015090817.txt");
+//		upe.setInputFolderOrFile("/Users/vincentgong/Documents/TUD/Master TUD/A Master Thesis/share/IPX/2zhen/crawldata/mylog-workdesk/userpost-sep10/json/post-json-2015090817.txt");
 		upe.setDB("jdbc:postgresql://localhost/microblog", "postgres", "admin",
 				"socialmedia.user", "socialmedia.post");
 		upe.process();
@@ -60,14 +61,16 @@ public class UserGeoTimelineExtractor {
 				// System.out.println(line);
 				// Status s = statusList.get(0);
 				// System.out.println(s);
-
+//				DataProcessUtils.extractPOIinfo(statusList);
+//				DataProcessUtils.extractLocationInfo(statusList);
+				
 				// insert one-line-status into Status table
-//				extractPOIinfo(statusList);
+
 				
 				StatusDB sdb = new StatusDB(this.url, this.username,
 						this.password, this.userTableName, this.postTableName);
-				sdb.insertStatusList(statusList); // insert the statuses into
-													// table
+//				sdb.insertStatusList(statusList); // insert the statuses into
+//													// table
 				sdb.insertUserOnlyOnceFromStatusList(statusList); // insert the
 																	// user of
 																	// this line
@@ -84,25 +87,6 @@ public class UserGeoTimelineExtractor {
 		}
 	}
 
-	private void extractPOIinfo(List<Status> statusList) {
-		for(Status s: statusList){
-//			String line = s.getAnnotations();
-//			if(!line.contains("poiid")){
-//				continue;
-//			}
-			String line = s.getPoiid();
-			if("".equals(line)){
-				continue;
-			}
-			try {
-				MyLineWriter.getInstance().writeLine("/Users/vincentgong/Documents/TUD/Master TUD/A Master Thesis/share/IPX/2zhen/crawldata/mylog-workdesk/userpost-sep10/json/post-json-2015090817-poiid.txt", s.getAnnotations());
-				MyLineWriter.getInstance().writeLine("/Users/vincentgong/Documents/TUD/Master TUD/A Master Thesis/share/IPX/2zhen/crawldata/mylog-workdesk/userpost-sep10/json/post-json-2015090817-poiid.txt", line);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
 
 	private void setDB(String DBUrl, String dbusername, String dbpassword,
 			String userDbTableName, String postDbTableName) {

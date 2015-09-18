@@ -107,7 +107,7 @@ public class StatusDB {
 				+ "(user_id, created_at, createdat_origin, screen_name, name, province, city, location, description, blog_url, "
 				+ "profile_image_url, user_domain, gender, followers_count, friends_count, statuses_count, favourites_count, verified, verified_type, is_allow_all_act_msg, "
 				+ "is_allow_all_comment, avatar_large, online_status, bi_followers_count, remark, lang, verified_reason, weihao,"
-				+ ", location_country, location_province, location_city, lcation_region, "
+				+ "location_country, location_province, location_city, location_region, "
 				// todo: get below items from face++
 				// + ", age, age_range, "
 				// +
@@ -149,7 +149,7 @@ public class StatusDB {
 			preparedStatement.setString(28, user.getWeihao());
 			
 			// analyze the location
-			 LocationSeparator ls = new LocationSeparator(user.getLocation());
+			LocationSeparator ls = new LocationSeparator(user.getLocation());
 			preparedStatement.setString(29, ls.getCountry());
 			preparedStatement.setString(30, ls.getProvince());
 			preparedStatement.setString(31, ls.getCity());
@@ -174,7 +174,7 @@ public class StatusDB {
 			System.out.println(user.getCreatedAt_origin() + " "
 					+ user.getScreenName() + " " + user.getDescription());
 		} catch (SQLException e) {
-			System.err.println("Something wrong when writing the post to DB.");
+			System.err.println("Something wrong when writing the user to DB.");
 			System.err.println(e.getMessage());
 		}
 

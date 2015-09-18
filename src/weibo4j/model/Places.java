@@ -26,6 +26,10 @@ public class Places extends WeiboResponse {
 	private double lat;// 纬度
 	private String category;
 	private String city;
+	//----add by Vincent
+	private String county = "	";
+	private District district;
+	//----
 	private String province;
 	private String country;
 	private String url;
@@ -56,6 +60,11 @@ public class Places extends WeiboResponse {
 			lat = json.getDouble("lat");
 			category = json.getString("category");
 			city = json.getString("city");
+			//---added by Vincent
+			if(json.has("district_info")){
+				district = new District(json.getJSONObject("district_info"));
+			}
+			//---
 			province = json.getString("privince");
 			country = json.getString("country");
 			url = json.getString("url");
@@ -87,6 +96,11 @@ public class Places extends WeiboResponse {
 			lat = json.getDouble("lat");
 			category = json.getString("category");
 			city = json.getString("city");
+			//---added by Vincent
+			if(json.has("district_info")){
+				district = new District(json.getJSONObject("district_info"));
+			}
+			//---
 			province = json.getString("privince");
 			country = json.getString("country");
 			url = json.getString("url");
@@ -227,6 +241,14 @@ public class Places extends WeiboResponse {
 		return weiboId;
 	}
 
+	public District getDistrict() {
+		return district;
+	}
+
+	public void setDistrict(District district) {
+		this.district = district;
+	}
+
 	public void setWeiboId(long weiboId) {
 		this.weiboId = weiboId;
 	}
@@ -309,6 +331,14 @@ public class Places extends WeiboResponse {
 
 	public void setDistance(long distance) {
 		this.distance = distance;
+	}
+
+	public String getCounty() {
+		return county;
+	}
+
+	public void setCounty(String county) {
+		this.county = county;
 	}
 
 	@Override

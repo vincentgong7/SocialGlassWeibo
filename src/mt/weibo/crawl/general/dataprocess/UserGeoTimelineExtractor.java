@@ -21,8 +21,8 @@ public class UserGeoTimelineExtractor {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		UserGeoTimelineExtractor upe = new UserGeoTimelineExtractor();
-		upe.setInputFolderOrFile("D:/documents/Dropbox/TUD/Master TUD/A Master Thesis/share/IPX/2ndZhen/crawldata/mylog-workstation/mylog2015sep-Userpost/json/post-json-2015090817.txt");
-//		upe.setInputFolderOrFile("/Users/vincentgong/Documents/TUD/Master TUD/A Master Thesis/share/IPX/2zhen/crawldata/mylog-workdesk/userpost-sep10/json/post-json-2015090817.txt");
+//		upe.setInputFolderOrFile("D:/documents/Dropbox/TUD/Master TUD/A Master Thesis/share/IPX/2ndZhen/crawldata/mylog-workstation/mylog2015sep-Userpost/json/post-json-2015090817.txt");
+		upe.setInputFolderOrFile("/Users/vincentgong/Documents/TUD/Master TUD/A Master Thesis/share/IPX/2zhen/crawldata/mylog-workdesk/userpost-sep10/json/post-json-2015090817.txt");
 		upe.setDB("jdbc:postgresql://localhost/microblog", "postgres", "admin",
 				"socialmedia.user", "socialmedia.post");
 		upe.process();
@@ -45,6 +45,8 @@ public class UserGeoTimelineExtractor {
 
 	private void parseStatus(File f) {
 		try {
+			StatusDB sdb = new StatusDB(this.url, this.username,
+					this.password, this.userTableName, this.postTableName);
 			MyLineReader mlr = new MyLineReader(f);
 			while (mlr.hasNextLine()) {
 				String line = mlr.nextLine().trim();
@@ -67,9 +69,8 @@ public class UserGeoTimelineExtractor {
 				// insert one-line-status into Status table
 
 				
-				StatusDB sdb = new StatusDB(this.url, this.username,
-						this.password, this.userTableName, this.postTableName);
-//				sdb.insertStatusList(statusList); // insert the statuses into
+				
+				sdb.insertStatusList(statusList); // insert the statuses into
 //													// table
 				sdb.insertUserOnlyOnceFromStatusList(statusList); // insert the
 																	// user of
@@ -79,7 +80,9 @@ public class UserGeoTimelineExtractor {
 																	// only one
 																	// user is
 																	// inserted
+				
 			}
+			sdb.close();
 			mlr.close();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

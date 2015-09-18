@@ -43,7 +43,9 @@ public class LocationSeparator {
 			else if("北京".equals(tmp[0]) || "天津".equals(tmp[0]) || "上海".equals(tmp[0]) || "重庆".equals(tmp[0])){
 				country = "中国";
 				city = tmp[0];
-				region = tmp[1];
+				if(tmp.length>1){
+					region = tmp[1];
+				}
 			}
 			else if("香港".equals(tmp[0]) || "澳门".equals(tmp[0])){
 				country = "中华";

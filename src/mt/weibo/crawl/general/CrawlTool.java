@@ -7,12 +7,18 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Map;
 
+import weibo4j.model.WeiboException;
+import mt.weibo.common.AppKeyCenter;
 import mt.weibo.common.MyLineReader;
 import mt.weibo.common.Utils;
+import mt.weibo.crawl.experiment.ExpUtils;
 import mt.weibo.model.Coordinates;
 
 public class CrawlTool {
+	
+
 	public static long timeToUnixTime(String strTime) {
 		// 2015-05-29 00:00:01
 		SimpleDateFormat parser = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
@@ -208,5 +214,24 @@ public class CrawlTool {
 		}
 		return uidList;
 	}
+
+	public static String autoCrawl(String api, Map<String, String> map, String logName) {
+		String json = "";
+		String key = AppKeyCenter.getInstance().getNextKey();
+		String line = "[" + api +"] " +  map.toString();
+		ExpUtils.mylog(CrawlTool.splitFileNameByHour(logName), line);
+		try {
+			json = ExpUtils.crawlData(api, map, key);
+		} catch (WeiboException e) {
+			System.err.println("Something wrong when auto-crawling.");
+			System.out.println(api);
+			System.out.println(map.toString());
+			e.printStackTrace();
+		}
+		
+		return json;
+	}
+
+	
 
 }

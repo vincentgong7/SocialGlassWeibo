@@ -18,5 +18,6 @@
 	<classpathentry kind="lib" path="lib/json-lib.jar"/>
 	<classpathentry kind="lib" path="lib/commons-lang-2.6.jar"/>
 	<classpathentry kind="lib" path="lib/faceppsdk.jar"/>
+	<classpathentry kind="lib" path="lib/faceppsdk_min.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -41,7 +41,7 @@ public class PoiDB {
 				+ specifiedPoiTableName
 				+ " (poiid, title, address, lat, lon, "
 				+ "category, county, city, province, country,"
-				+ "url, postcode, categorys, category_name, icon,"
+				+ "url, postcode, categorys_path, category_name, icon,"
 				+ "checkin_num, checkin_user_num, tip_num, photo_num, todo_num, distance)"
 				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 

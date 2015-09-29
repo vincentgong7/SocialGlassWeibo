@@ -22,8 +22,6 @@ public class FaceDetectProcess {
 		// should be run periodicity
 		FaceDetectProcess fdp = new FaceDetectProcess();
 		fdp.process();
-		
-		
 	}
 	
 	public FaceDetectProcess(){

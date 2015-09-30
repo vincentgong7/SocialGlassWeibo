@@ -43,7 +43,7 @@ public class UserGeoTimeline {
 	public static void main(String[] args) {
 		UserGeoTimeline ugt = new UserGeoTimeline();
 		ugt.setup(args[0]);
-//		ugt.setup("/userpost-config.txt");
+		// ugt.setup("/userpost-config.txt");
 		ugt.process();
 	}
 
@@ -84,9 +84,14 @@ public class UserGeoTimeline {
 			// prepare the uid, page, count
 			if (null == currentUid || "".equals(currentUid)) {
 				currentUid = getNextUidTillEnd(currentUid);
-				
-				if(currentUid=="finish" || "finish".equals(currentUid)){// all uids have been crawled
-					String line = "All uids have been crawled, now finish! " + new Date();
+
+				if (currentUid == "finish" || "finish".equals(currentUid)) {// all
+																			// uids
+																			// have
+																			// been
+																			// crawled
+					String line = "All uids have been crawled, now finish! "
+							+ new Date();
 					System.out.println(line);
 					ExpUtils.mylog(CrawlTool.splitFileNameByHour(logName), line);
 					break;
@@ -97,9 +102,14 @@ public class UserGeoTimeline {
 				// empty result get, goto next id, page = 1
 				currentUid = getNextUidTillEnd(currentUid);
 				page = 1;
-				
-				if(currentUid=="finish" || "finish".equals(currentUid)){// all uids have been crawled
-					String line = "All uids have been crawled, now finish! " + new Date();
+
+				if (currentUid == "finish" || "finish".equals(currentUid)) {// all
+																			// uids
+																			// have
+																			// been
+																			// crawled
+					String line = "All uids have been crawled, now finish! "
+							+ new Date();
 					System.out.println(line);
 					ExpUtils.mylog(CrawlTool.splitFileNameByHour(logName), line);
 					break;
@@ -112,7 +122,7 @@ public class UserGeoTimeline {
 			// prepare the parameter map
 			Map<String, String> map = getParaMap(currentUid, page, count);
 			System.out.println(map.toString());
-			
+
 			// sleep interval
 			CrawlTool.sleep(this.interval, this.logSign);
 
@@ -211,7 +221,7 @@ public class UserGeoTimeline {
 
 			// User ID file
 			this.uidFileName = config.getProperty("uid_file_name");
-			if(config.containsKey("start_uid")){// uid starting point
+			if (config.containsKey("start_uid")) {// uid starting point
 				this.startingUid = config.getProperty("start_uid");
 			}
 
@@ -235,22 +245,23 @@ public class UserGeoTimeline {
 			}
 		}
 	}
-	
+
 	public String getNextUidTillEnd(String currentUid) {
 		int uidID = uidList.indexOf(currentUid);
 		int nextUidID;
 		nextUidID = uidID + 1;
-		if(nextUidID<0){
+		if (nextUidID < 0) {
 			nextUidID = 0;
 		}
-		if(nextUidID >= this.uidList.size()){
+		if (nextUidID >= this.uidList.size()) {
 			return "finish";
 		}
-		if(uidID != nextUidID){
+		if (uidID != nextUidID) {
 			System.out.println("change uid.");
-			ExpUtils.mylog(CrawlTool.splitFileNameByHour(this.logName), this.logSign + " Change uid.");
+			ExpUtils.mylog(CrawlTool.splitFileNameByHour(this.logName),
+					this.logSign + " Change uid.");
 		}
 		return uidList.get(nextUidID);
 	}
-	
+
 }

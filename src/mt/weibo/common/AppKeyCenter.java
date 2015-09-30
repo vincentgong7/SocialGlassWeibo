@@ -5,7 +5,7 @@ import java.util.List;
 
 public class AppKeyCenter {
 
-	private String keyFile = Utils.getPath() + "/key.txt"; // default key.txt is located in bin folder
+	private String keyFile = Utils.getPath() + "/appkey.txt"; // default appkey.txt is located in bin folder
 	private List<String> keys;
 	private String currentGlobalKey;// the current key for the public auto-crawl center
 	
@@ -51,7 +51,8 @@ public class AppKeyCenter {
 	public String getNextKey(List<String> keyList, String currentKey) {
 		int keyID = keyList.indexOf(currentKey);
 		if (keyID < 0 || keyID >= keyList.size()-1) {
-			return keyList.get(0);
+			int random = Utils.randomInt(0, keyList.size()); //starting from a random key, rather than the 1st one
+			return keyList.get(random);
 		} else {
 			return keyList.get(keyID + 1);
 		}

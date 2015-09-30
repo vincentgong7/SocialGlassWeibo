@@ -13,6 +13,12 @@ import mt.weibo.common.MyLineReader;
 import mt.weibo.common.MyLineWriter;
 import mt.weibo.db.UserDB;
 
+/*
+ * Extract the unique nearbyuser id from a set of nearbyuser json files
+ * and store them into txt file
+ * 
+ * */
+
 public class NearbyUserDataExtractor {
 
 	private String inputFileName;

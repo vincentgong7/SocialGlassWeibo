@@ -144,7 +144,7 @@ public class Status extends WeiboResponse {
 		longitude=Double.parseDouble(value.toString());
 		*/
 		
-		String pattern = "[0-9]+\\.{0,1}[0-9]*,[0-9]+\\.{0,1}[0-9]*";
+		String pattern = "[-]{0,1}[0-9]+\\.{0,1}[0-9]*,[-]{0,1}[0-9]+\\.{0,1}[0-9]*";
 		Pattern r = Pattern.compile(pattern);
 		Matcher m = r.matcher(geo);
 		if (m.find()) {

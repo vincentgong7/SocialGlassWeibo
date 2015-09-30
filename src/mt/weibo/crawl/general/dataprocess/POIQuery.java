@@ -51,16 +51,17 @@ public class POIQuery {
 			stmt = con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
 					ResultSet.CONCUR_UPDATABLE);
 			ResultSet poiq = stmt
-					.executeQuery("SELECT status_id, latitude,longitude,poiid, is_poiid_checked, is_valid district FROM "
-							+ statusTableName + " where is_poiid_checked = false and is_valid = true");
+					.executeQuery("SELECT status_id, latitude,longitude,poiid, is_poiid_checked, is_valid, district FROM "
+							+ statusTableName
+							+ " where is_poiid_checked = false and is_valid = true");
 
 			Places place;
 			while (poiq.next()) {
 
-//				if (poiq.getBoolean("is_poiid_checked")) {// if it has been
-//					continue;
-//				}
-				
+				// if (poiq.getBoolean("is_poiid_checked")) {// if it has been
+				// continue;
+				// }
+
 				double lat = poiq.getDouble("latitude");
 				double longi = poiq.getDouble("longitude");
 				String ori_poiid = poiq.getString("poiid");
@@ -68,7 +69,16 @@ public class POIQuery {
 				CrawlTool.sleep(this.interval, "[POIID]");
 				List<Places> poiList = queryPoi(lat, longi);
 
-				if (poiList == null) {
+				if (poiList == null || poiList.size() == 0) {// if poiList is
+																// null, we
+																// still mark it
+																// as checked
+					if(ori_poiid!=null || !"".equals(ori_poiid)){
+						poiq.updateString("district", ori_poiid);
+					}
+					poiq.updateString("poiid", "");
+					poiq.updateBoolean("is_poiid_checked", true);
+					poiq.updateRow();
 					continue;
 				}
 				if (poiList.size() > 0) {
@@ -85,9 +95,11 @@ public class POIQuery {
 					if (!ori_poiid.equals(place.getPoiid())) {
 						poiq.updateString("district", ori_poiid);
 						poiq.updateString("poiid", place.getPoiid());
-						poiq.updateBoolean("is_poiid_checked", true);
-						poiq.updateRow();
 					}
+					// either situation we mark it as 'checked'
+					poiq.updateBoolean("is_poiid_checked", true);
+					poiq.updateRow();
+
 					insertPoiInfo(place);
 				}
 			}
@@ -120,14 +132,14 @@ public class POIQuery {
 		List<Places> list = new ArrayList<Places>();
 		try {
 			jsonObj = new JSONObject(json);
-				JSONArray pois = jsonObj.getJSONArray("pois");
-				if(pois!=null){
-					int size = pois.length();
-					list = new ArrayList<Places>(size);
-					for (int i = 0; i < size; i++) {
-						list.add(new Places(pois.getJSONObject(i)));
-					}
+			JSONArray pois = jsonObj.getJSONArray("pois");
+			if (pois != null) {
+				int size = pois.length();
+				list = new ArrayList<Places>(size);
+				for (int i = 0; i < size; i++) {
+					list.add(new Places(pois.getJSONObject(i)));
 				}
+			}
 		} catch (JSONException e) {
 			e.printStackTrace();
 		} catch (WeiboException e) {

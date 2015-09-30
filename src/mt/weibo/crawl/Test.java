@@ -3,6 +3,9 @@
  */
 package mt.weibo.crawl;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import mt.weibo.common.MyLineReader;
 import mt.weibo.common.MyLineWriter;
 
@@ -66,12 +69,30 @@ public class Test {
 //		String filename = "aaa.txt";
 //		System.out.println(filename.split("\\.")[0]);
 		
-		MyLineReader mlr = new MyLineReader("/Users/vincentgong/Documents/TUD/Master TUD/A Master Thesis/share/servers/beijing/v1/posts/uid-item.txt");
-		while(mlr.hasNextLine()){
-			String line = mlr.nextLine().split(",")[0];
-			MyLineWriter.getInstance().writeLine("/Users/vincentgong/Documents/TUD/Master TUD/A Master Thesis/share/servers/beijing/v1/posts/uid.txt", line);
+//		MyLineReader mlr = new MyLineReader("/Users/vincentgong/Documents/TUD/Master TUD/A Master Thesis/share/servers/beijing/v1/posts/uid-item.txt");
+//		while(mlr.hasNextLine()){
+//			String line = mlr.nextLine().split(",")[0];
+//			MyLineWriter.getInstance().writeLine("/Users/vincentgong/Documents/TUD/Master TUD/A Master Thesis/share/servers/beijing/v1/posts/uid.txt", line);
+//		}
+//		mlr.close();
+		
+		getGeoInfo("{\"type\":\"Point\",\"coordinates\":[-20.068632,-57.519123]}");
+		getGeoInfo("{\"type\":\"Point\",\"coordinates\":[20.068632,-57.519123]}");
+		getGeoInfo("{\"type\":\"Point\",\"coordinates\":[20.068632,57.519123]}");
+	}
+	
+	private static void getGeoInfo(String geo) {
+		String pattern = "[-]{0,1}[0-9]+\\.{0,1}[0-9]*,[-]{0,1}[0-9]+\\.{0,1}[0-9]*";
+		Pattern r = Pattern.compile(pattern);
+		Matcher m = r.matcher(geo);
+		if (m.find()) {
+			if(m.groupCount()>=0){
+				String[] coord = m.group(0).split(",");
+				double latitude = Double.parseDouble(coord[0]);
+				double longitude= Double.parseDouble(coord[1]);
+				System.out.println(latitude + ", " + longitude);
+			}
 		}
-		mlr.close();
 	}
 
 }

@@ -12,9 +12,11 @@ import java.util.Properties;
 
 import mt.weibo.common.Utils;
 import mt.weibo.crawl.experiment.ExpUtils;
+import mt.weibo.db.StatusDB;
 
 import org.apache.commons.lang.StringEscapeUtils;
 
+import weibo4j.model.Status;
 import weibo4j.model.WeiboException;
 
 public class UserGeoTimeline {
@@ -33,6 +35,9 @@ public class UserGeoTimeline {
 	private long startCrawlTimeStamp;
 	private long stopCrawlTimeStamp;
 
+	private long stopCrawlPostTimeStamp; // posts after this timestamp wont be
+											// crawled.
+
 	// user id
 	private String uidFileName;
 	private List<String> uidList;
@@ -43,7 +48,7 @@ public class UserGeoTimeline {
 	public static void main(String[] args) {
 		UserGeoTimeline ugt = new UserGeoTimeline();
 		ugt.setup(args[0]);
-		// ugt.setup("/userpost-config.txt");
+//		ugt.setup("usergeotimelineconfig.txt");
 		ugt.process();
 	}
 
@@ -65,6 +70,7 @@ public class UserGeoTimeline {
 		int page = 0;
 		String currentUid = "";
 		boolean isResultEmpty = false;
+		boolean isResultTooOld = false;
 		boolean isError = false;
 
 		while (true) {
@@ -96,12 +102,13 @@ public class UserGeoTimeline {
 					ExpUtils.mylog(CrawlTool.splitFileNameByHour(logName), line);
 					break;
 				}
-				page = 1;
+				page = 0; // because later there will be page++
 			}
 			if (isResultEmpty) {
 				// empty result get, goto next id, page = 1
+				System.out.println("The result is empty.");
 				currentUid = getNextUidTillEnd(currentUid);
-				page = 1;
+				page = 0;
 
 				if (currentUid == "finish" || "finish".equals(currentUid)) {// all
 																			// uids
@@ -114,10 +121,30 @@ public class UserGeoTimeline {
 					ExpUtils.mylog(CrawlTool.splitFileNameByHour(logName), line);
 					break;
 				}
-			} else {
-				// try the same id and next page
-				page++;
 			}
+
+			// if the posts got is older than the required date, then stop next
+			// page, and change to the next userid
+			if (isResultTooOld) {
+				System.out.println("The last post is too old.");
+				currentUid = getNextUidTillEnd(currentUid);
+				page = 0;
+
+				if (currentUid == "finish" || "finish".equals(currentUid)) {// all
+					// uids
+					// have
+					// been
+					// crawled
+					String line = "All uids have been crawled, now finish! "
+							+ new Date();
+					System.out.println(line);
+					ExpUtils.mylog(CrawlTool.splitFileNameByHour(logName), line);
+					break;
+				}
+
+			}
+			
+			page ++;
 
 			// prepare the parameter map
 			Map<String, String> map = getParaMap(currentUid, page, count);
@@ -152,6 +179,12 @@ public class UserGeoTimeline {
 					isError = false;
 				}
 
+				if (isResultTooOld(result)) {
+					isResultTooOld = true;
+				} else {
+					isResultTooOld = false;
+				}
+
 				if (!isResultEmpty && !isError) {
 					ExpUtils.mylogJson(
 							CrawlTool.splitFileNameByHour(JsonlogName), result);
@@ -167,6 +200,34 @@ public class UserGeoTimeline {
 				continue;
 			}
 		}
+	}
+
+	// identify if the post is too old
+	private boolean isResultTooOld(String result) {
+		// parse post, check the last one's timestamp, if not old enough then
+		// continue
+		if (result == null || "[]".equals(result)
+				|| result.startsWith("{\"error\"") || !result.startsWith("{\"statuses\"")) {
+			return false;
+		}
+		List<Status> statusList;
+		try {
+			statusList = StatusDB.getStatusList(result);
+		} catch (WeiboException we) {
+			System.out
+					.println("Error in constructing status list for checking if the post is too old.");
+			// we.printStackTrace();
+			return false;
+		}
+
+		if (!statusList.isEmpty()) {
+			Status s = statusList.get(statusList.size() - 1);
+			System.out.println("The last geo-post date: " + s.getCreatedAt().toString());
+			if (CrawlTool.timeToUnixTime(s.getCreatedAt()) <= this.stopCrawlPostTimeStamp) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private Map<String, String> getParaMap(String currentUid, int page,
@@ -208,6 +269,10 @@ public class UserGeoTimeline {
 					.getProperty("start_crawl_time"));
 			this.stopCrawlTimeStamp = CrawlTool.timeToUnixTime(config
 					.getProperty("stop_crawl_time"));
+
+			// posts posted after this timestamp wont be crawled
+			this.stopCrawlPostTimeStamp = CrawlTool.timeToUnixTime(config
+					.getProperty("stop_crawl_post_time"));
 
 			// max page
 			if (config.containsKey("max_page_count")) {

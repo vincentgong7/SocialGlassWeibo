@@ -22,6 +22,9 @@ import mt.weibo.db.UserDB;
 public class NearbyUserDataExtractor {
 
 	private String inputFileName;
+	private String outputFolderName;
+	private String outputFileNamePrefix = "userid.txt";
+	private String outputFileName;
 	private Map<String, User> userMap;
 	private int totalUserAmount;
 	private int uniqueUserAmount;
@@ -29,18 +32,27 @@ public class NearbyUserDataExtractor {
 
 	public static void main(String[] args) {
 		NearbyUserDataExtractor nude = new NearbyUserDataExtractor();
-		nude.setInputFilename("/Users/vincentgong/Documents/TUD/Master TUD/A Master Thesis/share/IPX/2zhen/crawldata/mylog-workdesk/nearbyuser-sep7/json/");
+//		nude.setInputFilename("/Users/vincentgong/Documents/TUD/Master TUD/A Master Thesis/share/IPX/2zhen/crawldata/mylog-workdesk/nearbyuser-sep7/json/");
+		nude.setInputFilename(args[0]);
+		nude.setOutputFoldername(args[1]);
 		nude.process();
-		nude.outputIDFile("/Users/vincentgong/Documents/TUD/Master TUD/A Master Thesis/share/IPX/2zhen/crawldata/mylog-workdesk/nearbyuser-sep7/userid.txt");
-		List<User> userList = nude.getUserList();
-		Map<String, User> userMap = nude.getUserMap();
+		nude.outputIDFile();
+//		nude.outputIDFile("/Users/vincentgong/Documents/TUD/Master TUD/A Master Thesis/share/IPX/2zhen/crawldata/mylog-workdesk/nearbyuser-sep7/userid.txt");
+//		List<User> userList = nude.getUserList();
+//		Map<String, User> userMap = nude.getUserMap();
 	}
+
 
 	private void setInputFilename(String inputFileName) {
 		this.inputFileName = inputFileName;
 		userMap = new HashMap<String, User>();
 	}
 
+	private void setOutputFoldername(String outputFolderName){
+		this.outputFolderName = outputFolderName;
+		this.outputFileName = outputFolderName + this.outputFileNamePrefix;
+	}
+	
 	private void process() {
 		File f = new File(this.inputFileName);
 		if (f.isDirectory()) {// f is a folder with json files
@@ -56,9 +68,16 @@ public class NearbyUserDataExtractor {
 		
 		this.uniqueRate = Double.valueOf(this.uniqueUserAmount)
 				/ Double.valueOf(this.totalUserAmount);
-		System.out.println("finished, total user: " + this.totalUserAmount
+		String report = "finished, total user: " + this.totalUserAmount
 				+ ", uniqueUserAmount: " + this.uniqueUserAmount
-				+ ", unique rate: " + this.uniqueRate);
+				+ ", unique rate: " + this.uniqueRate;
+		
+		System.out.println(report);
+		try {
+			MyLineWriter.getInstance().writeLine(this.outputFolderName + "report.txt", report);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 	}
 
@@ -91,6 +110,10 @@ public class NearbyUserDataExtractor {
 		}
 	}
 
+	private void outputIDFile() {
+		this.outputIDFile(this.outputFileName);
+	}
+	
 	private void outputIDFile(String outputFileName) {
 		Iterator<Map.Entry<String, User>> it = userMap.entrySet().iterator();
 		while (it.hasNext()) {

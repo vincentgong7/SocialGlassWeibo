@@ -31,6 +31,11 @@ public class CrawlTool {
 			return 0;
 		}
 	}
+	
+	public static long timeToUnixTime(Date date){
+		return date.getTime();
+	}
+	
 
 	public static List<String> initAppkey(String fileName) {
 		return initAppkey(fileName, 0, -1);

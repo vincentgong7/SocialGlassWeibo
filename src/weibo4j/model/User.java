@@ -61,6 +61,7 @@ public class User extends WeiboResponse {
 	private Date createdAt;               //创建时间
 	//added by Vincent
 	//---------
+	private String profileURL;
 	private String createdAt_origin;						//原始时间
 	private boolean geo_enabled = false;							//是否开启了geo
 	private double lat = 0d;										//坐标
@@ -286,6 +287,11 @@ public class User extends WeiboResponse {
 					status = new Status(json.getJSONObject("status"));
 				}
 				//-----added by vincent------
+				if(json.has("profile_url")){
+					if(!json.isNull("profile_url")){
+						profileURL = json.getString("profile_url");
+					}
+				}
 				if(json.has("geo_enabled")){
 					if(!json.isNull("geo_enabled")){
 						geo_enabled = json.getBoolean("geo_enabled");
@@ -485,6 +491,12 @@ public class User extends WeiboResponse {
 	}
 	public void setGeo_enabled(boolean geo_enabled) {
 		this.geo_enabled = geo_enabled;
+	}
+	public String getProfileURL() {
+		return profileURL;
+	}
+	public void setProfileURL(String profileURL) {
+		this.profileURL = profileURL;
 	}
 	public double getLat() {
 		return lat;

@@ -174,7 +174,7 @@ public class StatusDB {
 			// execute insert SQL stetement
 			preparedStatement.executeUpdate();
 			preparedStatement.close();
-			System.out.println(user.getCreatedAt_origin() + " "
+			System.out.println("User ID = " + user.getId() + ": " + user.getCreatedAt_origin() + " "
 					+ user.getScreenName() + " " + user.getDescription());
 		} catch (SQLException e) {
 			System.err.println("Something wrong when writing the user to DB.");
@@ -233,7 +233,7 @@ public class StatusDB {
 			// execute insert SQL stetement
 			preparedStatement.executeUpdate();
 			preparedStatement.close();
-			System.out.println(st.getCreatedAt_origin() + " " + st.getText());
+			System.out.println("Status ID = " + st.getId() + ": " +st.getCreatedAt_origin() + " " + st.getText());
 		} catch (SQLException e) {
 			System.err.println("Something wrong when writing the post to DB.");
 			System.err.println(e.getMessage());
@@ -271,11 +271,13 @@ public class StatusDB {
 					totalNumber, hasvisible);
 		} catch (JSONException jsone) {
 			throw new WeiboException(jsone);
+		} catch (Exception e){
+			throw e;
 		}
 	}
 
 	// get the status list from status json
-	public static List<Status> getStatusList(String json) throws WeiboException {
+	public static List<Status> getStatusList(String json) throws Exception {
 		List<Status> statusList = new ArrayList<Status>();
 		StatusWapper sw;
 		if (json != null && !json.equals("")) {

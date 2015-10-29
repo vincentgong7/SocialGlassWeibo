@@ -19,7 +19,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import weibo4j.model.Status;
 import weibo4j.model.WeiboException;
 
-public class UserGeoTimeline {
+public class UserGeoTimelineTest {
 
 	private String logSign = "[UserGeoTimeline]";
 	private String api = "place/user_timeline.json";
@@ -34,6 +34,8 @@ public class UserGeoTimeline {
 	private Integer interval;
 	private long startCrawlTimeStamp;
 	private long stopCrawlTimeStamp;
+	private int requestedCrawlingTimes = 0;
+	private int crawledTimes = 0;
 
 	private long stopCrawlPostTimeStamp; // posts after this timestamp wont be
 											// crawled.
@@ -46,9 +48,9 @@ public class UserGeoTimeline {
 	private int count = 50;
 
 	public static void main(String[] args) {
-		UserGeoTimeline ugt = new UserGeoTimeline();
+		UserGeoTimelineTest ugt = new UserGeoTimelineTest();
 		ugt.setup(args[0]);
-//		ugt.setup("usergeotimelineconfig.txt");
+		// ugt.setup("usergeotimelineconfig.txt");
 		ugt.process();
 	}
 
@@ -82,6 +84,11 @@ public class UserGeoTimeline {
 				// report this round
 				System.out.println("Time's up. Stop crawling now.");
 				break;
+			}
+
+			// check if it is the max times to crawl
+			if (!(this.requestedCrawlingTimes > 0 && this.requestedCrawlingTimes >= this.crawledTimes)) {
+				return;
 			}
 
 			// prepare the key
@@ -125,30 +132,33 @@ public class UserGeoTimeline {
 
 			// if the posts got is older than the required date, then stop next
 			// page, and change to the next userid
-//			if (isResultTooOld) {
-//				System.out.println("The last post is too old.");
-//				currentUid = getNextUidTillEnd(currentUid);
-//				page = 0;
-//
-//				if (currentUid == "finish" || "finish".equals(currentUid)) {// all
-//					// uids
-//					// have
-//					// been
-//					// crawled
-//					String line = "All uids have been crawled, now finish! "
-//							+ new Date();
-//					System.out.println(line);
-//					ExpUtils.mylog(CrawlTool.splitFileNameByHour(logName), line);
-//					break;
-//				}
-//
-//			}
-			
-			page ++;
+			// if (isResultTooOld) {
+			// System.out.println("The last post is too old.");
+			// currentUid = getNextUidTillEnd(currentUid);
+			// page = 0;
+			//
+			// if (currentUid == "finish" || "finish".equals(currentUid)) {//
+			// all
+			// // uids
+			// // have
+			// // been
+			// // crawled
+			// String line = "All uids have been crawled, now finish! "
+			// + new Date();
+			// System.out.println(line);
+			// ExpUtils.mylog(CrawlTool.splitFileNameByHour(logName), line);
+			// break;
+			// }
+			//
+			// }
+
+			page++;
 
 			// prepare the parameter map
 			Map<String, String> map = getParaMap(currentUid, page, count);
 			System.out.println(map.toString());
+			this.crawledTimes++;
+			System.out.println("Crawling for the times: " + this.crawledTimes);
 
 			// sleep interval
 			CrawlTool.sleep(this.interval, this.logSign);
@@ -156,7 +166,8 @@ public class UserGeoTimeline {
 			// try to crawl
 			try {
 				String line = "uid=" + currentUid + ", page=" + page
-						+ ", count=" + count;
+						+ ", count=" + count + ", Crawl times: "
+						+ this.crawledTimes;
 				ExpUtils.mylog(CrawlTool.splitFileNameByHour(logName), line);
 
 				// try to get the data
@@ -179,11 +190,11 @@ public class UserGeoTimeline {
 					isError = false;
 				}
 
-//				if (isResultTooOld(result)) {
-//					isResultTooOld = true;
-//				} else {
-//					isResultTooOld = false;
-//				}
+				// if (isResultTooOld(result)) {
+				// isResultTooOld = true;
+				// } else {
+				// isResultTooOld = false;
+				// }
 
 				if (!isResultEmpty && !isError) {
 					ExpUtils.mylogJson(
@@ -207,7 +218,8 @@ public class UserGeoTimeline {
 		// parse post, check the last one's timestamp, if not old enough then
 		// continue
 		if (result == null || "[]".equals(result)
-				|| result.startsWith("{\"error\"") || !result.startsWith("{\"statuses\"")) {
+				|| result.startsWith("{\"error\"")
+				|| !result.startsWith("{\"statuses\"")) {
 			return false;
 		}
 		List<Status> statusList;
@@ -222,7 +234,8 @@ public class UserGeoTimeline {
 
 		if (!statusList.isEmpty()) {
 			Status s = statusList.get(statusList.size() - 1);
-			System.out.println("The last geo-post date: " + s.getCreatedAt().toString());
+			System.out.println("The last geo-post date: "
+					+ s.getCreatedAt().toString());
 			if (CrawlTool.timeToUnixTime(s.getCreatedAt()) <= this.stopCrawlPostTimeStamp) {
 				return true;
 			}
@@ -264,6 +277,11 @@ public class UserGeoTimeline {
 			// interval
 			this.interval = Integer.valueOf(config.getProperty("interval"));
 
+			// times to crawl
+			if (config.containsKey("crawl_times")) {
+				this.requestedCrawlingTimes = Integer.valueOf(config.getProperty("crawl_times"));
+			}
+			
 			// crawl start and end
 			this.startCrawlTimeStamp = CrawlTool.timeToUnixTime(config
 					.getProperty("start_crawl_time"));

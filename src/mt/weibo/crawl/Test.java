@@ -3,9 +3,11 @@
  */
 package mt.weibo.crawl;
 
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import mt.weibo.common.AppKeyCenter;
 import mt.weibo.common.MyLineReader;
 import mt.weibo.common.MyLineWriter;
 
@@ -76,9 +78,10 @@ public class Test {
 //		}
 //		mlr.close();
 		
-		getGeoInfo("{\"type\":\"Point\",\"coordinates\":[-20.068632,-57.519123]}");
-		getGeoInfo("{\"type\":\"Point\",\"coordinates\":[20.068632,-57.519123]}");
-		getGeoInfo("{\"type\":\"Point\",\"coordinates\":[20.068632,57.519123]}");
+//		getGeoInfo("{\"type\":\"Point\",\"coordinates\":[-20.068632,-57.519123]}");
+//		getGeoInfo("{\"type\":\"Point\",\"coordinates\":[20.068632,-57.519123]}");
+//		getGeoInfo("{\"type\":\"Point\",\"coordinates\":[20.068632,57.519123]}");
+		keyTest("appkey1.txt");
 	}
 	
 	private static void getGeoInfo(String geo) {
@@ -93,6 +96,20 @@ public class Test {
 				System.out.println(latitude + ", " + longitude);
 			}
 		}
+	}
+	
+	public static void keyTest(String keyfile){
+		for(int i=0;i<50;i++ ){
+			String key = AppKeyCenter.getInstance().getNextKey();
+			System.out.println(key);
+		}
+		System.out.println();
+		System.out.println();
+		for(int i=0;i<50;i++ ){
+			String key = AppKeyCenter.getInstance().getNextKey();
+			System.out.println(key);
+		}
+		
 	}
 
 }

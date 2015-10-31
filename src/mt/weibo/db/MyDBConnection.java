@@ -20,9 +20,9 @@ public class MyDBConnection {
 	Statement st = null;
 	ResultSet rs = null;
 
-	String url = "jdbc:postgresql://localhost/microblog";
+	String url = "jdbc:postgresql://localhost:5432/microblog";
 	String user = "postgres";
-	String password = "admin";
+	String password = "postgres";
 
 	/**
 	 * @param args

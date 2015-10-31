@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import mt.weibo.common.AppKeyCenter;
 import mt.weibo.crawl.general.CrawlTool;
 import mt.weibo.db.MyDBConnection;
 import mt.weibo.db.PoiDB;
@@ -26,12 +27,16 @@ public class POIQuery {
 	private String poiTableName = "socialmedia.poi";
 	private String distriTableName = "socialmedia.poi_district";
 
-	private int interval = 2;
+	private int interval = 3;
 	private String crawlRange = "2000";
 	private String api = "place/nearby/pois.json";
 	private String logFileName = "poiid_crawl_log.txt";
 
 	public static void main(String[] args) {
+		// usage: java -jar POIQuery.jar [appkeys.txt]
+		if (args.length > 0) {
+			AppKeyCenter.getInstance(args[0]);
+		}
 		POIQuery pq = new POIQuery();
 		pq.process();
 	}
@@ -53,7 +58,7 @@ public class POIQuery {
 			ResultSet poiq = stmt
 					.executeQuery("SELECT status_id, latitude,longitude,poiid, is_poiid_checked, is_valid, district FROM "
 							+ statusTableName
-							+ " where is_poiid_checked = false and is_valid = true");
+							+ " where is_poiid_checked = false and is_valid = true and is_in_scope = true");
 
 			Places place;
 			while (poiq.next()) {
@@ -73,7 +78,7 @@ public class POIQuery {
 																// null, we
 																// still mark it
 																// as checked
-					if(ori_poiid!=null || !"".equals(ori_poiid)){
+					if (ori_poiid != null || !"".equals(ori_poiid)) {
 						poiq.updateString("district", ori_poiid);
 					}
 					poiq.updateString("poiid", "");

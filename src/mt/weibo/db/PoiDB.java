@@ -78,7 +78,7 @@ public class PoiDB {
 			System.out.println("Place: " + p.getPoiid() + " " + p.getCountry()
 					+ p.getProvince() + p.getCity() + p.getCounty());
 		} catch (SQLException e) {
-			System.err.println("Something wrong when writing the user to DB.");
+			System.err.println("Something wrong when writing the data to table: " + specifiedPoiTableName);
 			System.err.println(e.getMessage());
 			// e.printStackTrace();
 		}
@@ -114,7 +114,7 @@ public class PoiDB {
 			preparedStatement.close();
 			System.out.println("District: " + d.getDistrictID() + " " + d.getTitle() + " " + d.getCountry() + d.getProvince() + d.getCity());
 		} catch (SQLException e) {
-			System.err.println("Something wrong when writing the user to DB.");
+			System.err.println("Something wrong when writing the data to table: " + specifiedDistriTableName);
 			System.err.println(e.getMessage());
 			e.printStackTrace();
 		}

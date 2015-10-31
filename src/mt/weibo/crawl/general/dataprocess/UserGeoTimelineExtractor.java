@@ -3,11 +3,9 @@ package mt.weibo.crawl.general.dataprocess;
 import java.io.File;
 import java.util.List;
 
-import weibo4j.model.Status;
-import weibo4j.model.WeiboException;
 import mt.weibo.common.MyLineReader;
-import mt.weibo.common.MyLineWriter;
 import mt.weibo.db.StatusDB;
+import weibo4j.model.Status;
 
 public class UserGeoTimelineExtractor {
 

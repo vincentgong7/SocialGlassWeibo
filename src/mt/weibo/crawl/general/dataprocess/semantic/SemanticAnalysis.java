@@ -18,18 +18,18 @@ public class SemanticAnalysis {
 		// name entity identifying
 		List<Word> list = nerAnalysis(text);
 		
-		// google translate
-		String line = "";
-		for(Word word: list){
-			line = word.getText() + " ";
-		}
-		if(""==line || "".equals(line)){
-			line = text;
-		}
-		String enText = googleTranslate(line);
-		
-		// semantic analysis
-		OpenCalaisAnalysis(enText);
+//		// google translate
+//		String line = "";
+//		for(Word word: list){
+//			line = word.getText() + " ";
+//		}
+//		if(""==line || "".equals(line)){
+//			line = text;
+//		}
+//		String enText = googleTranslate(line);
+//		
+//		// semantic analysis
+//		OpenCalaisAnalysis(enText);
 		return "done";
 	}
 	

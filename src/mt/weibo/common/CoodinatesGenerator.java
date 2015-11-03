@@ -10,7 +10,7 @@ public class CoodinatesGenerator {
 	public static void main(String[] args) {
 		double lat = 30.631269;
 		double longi = 104.060604;
-		double R = 11132*3;
+		double R = 11132 * 3;
 		double r = 11132;
 		double interval = r;
 		CoodinatesGenerator cg = new CoodinatesGenerator(lat, longi, R, r,
@@ -26,12 +26,11 @@ public class CoodinatesGenerator {
 	private double interval;
 	public static double LATITUDE_SECOND_PER_METER = 1 / 30.9;
 	private static double EARTH_RADIUS = 6378.137 * 1000;
-    private static final double PI = 3.14159265;
+	private static final double PI = 3.14159265;
 	private List<Coordinate> list;
 
 	public CoodinatesGenerator(double lat, double longi, double R, double r,
 			double interval) {
-		// TODO Auto-generated constructor stub
 		this.lat = lat;
 		this.longi = longi;
 		this.R = R;
@@ -40,14 +39,14 @@ public class CoodinatesGenerator {
 		this.list = new ArrayList<Coordinate>();
 	}
 
-	private void process() {
-		
+	public void process() {
+
 		if (this.R <= this.r) {// if the given R is shorter than r
 			Coordinate coord = new Coordinate(this.lat, this.longi, this.R);
 			this.list.add(coord);
 			return;
 		}
-		
+
 		CircleCalculator cc = new CircleCalculator(R, r, interval);
 		List<Coord> basicCoordsList = cc.process();
 		for (Coord c : basicCoordsList) {
@@ -57,7 +56,6 @@ public class CoodinatesGenerator {
 
 			// step1: Coordinate Y transformation & translation, from y to
 			// latitude
-//			Coordinate coordinate = new Coordinate(y, x, rad);
 			double absLat = transCoordinateY(y);
 
 			// step2: Coordinate X transformation & translation, from x to
@@ -67,22 +65,25 @@ public class CoodinatesGenerator {
 			// finale: adding to the list
 			Coordinate coordinate = new Coordinate(absLat, absLongi, rad);
 			this.list.add(coordinate);
-			
-//			System.out.println(absLat + "," + absLongi);
+
+			// System.out.println(absLat + "," + absLongi);
 		}
 	}
 
 	private double transCoordinateX(double x, double lat) {
 		double radLat = rad(lat);
-//		double LongitudeSecondPerMeter = CoodinatesGenerator.LATITUDE_SECOND_PER_METER * Math.cos(radLat);
-		double LongitudeSecondPerMeter = (360*3600) / (2*CoodinatesGenerator.PI*CoodinatesGenerator.EARTH_RADIUS*Math.cos(radLat));
-		double relativeLongitude = (x * LongitudeSecondPerMeter)/3600;
+		// double LongitudeSecondPerMeter =
+		// CoodinatesGenerator.LATITUDE_SECOND_PER_METER * Math.cos(radLat);
+		double LongitudeSecondPerMeter = (360 * 3600)
+				/ (2 * CoodinatesGenerator.PI
+						* CoodinatesGenerator.EARTH_RADIUS * Math.cos(radLat));
+		double relativeLongitude = (x * LongitudeSecondPerMeter) / 3600;
 		double absLongitude = relativeLongitude + this.longi;
 		return absLongitude;
 	}
 
 	private double transCoordinateY(double y) {
-		double relativeLat = (y * CoodinatesGenerator.LATITUDE_SECOND_PER_METER)/3600;
+		double relativeLat = (y * CoodinatesGenerator.LATITUDE_SECOND_PER_METER) / 3600;
 		double absLat = relativeLat + lat;
 		return absLat;
 	}

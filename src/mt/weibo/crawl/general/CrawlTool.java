@@ -9,7 +9,6 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 
-import weibo4j.model.WeiboException;
 import mt.weibo.common.AppKeyCenter;
 import mt.weibo.common.MyLineReader;
 import mt.weibo.common.Utils;
@@ -227,7 +226,7 @@ public class CrawlTool {
 		ExpUtils.mylog(CrawlTool.splitFileNameByHour(logName), line);
 		try {
 			json = ExpUtils.crawlData(api, map, key);
-		} catch (WeiboException e) {
+		} catch (Exception e) {
 			System.err.println("Something wrong when auto-crawling.");
 			System.out.println(api);
 			System.out.println(map.toString());
@@ -237,6 +236,21 @@ public class CrawlTool {
 		return json;
 	}
 
-	
+	public static String autoCrawl(String api, Map<String, String> map) {
+		String json = "";
+		String key = AppKeyCenter.getInstance().getNextKey();
+		String line = "[" + api +"] " +  map.toString();
+		System.out.println(line);
+		try {
+			json = ExpUtils.crawlData(api, map, key);
+		} catch (Exception e) {
+			System.err.println("Something wrong when auto-crawling.");
+			System.out.println(api);
+			System.out.println(map.toString());
+			e.printStackTrace();
+		}
+		
+		return json;
+	}
 
 }

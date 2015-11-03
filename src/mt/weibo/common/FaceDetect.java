@@ -88,9 +88,13 @@ public class FaceDetect {
 				list.add(face);
 			}
 		} catch (FaceppParseException e) {
+			System.err.println("Something wrong with detecting pic: "+ picURL);
 			e.printStackTrace();
+			return list;
 		} catch (JSONException e) {
+			System.err.println("Something wrong with detecting pic: "+ picURL);
 			e.printStackTrace();
+			return list;
 		}
 
 		return list;

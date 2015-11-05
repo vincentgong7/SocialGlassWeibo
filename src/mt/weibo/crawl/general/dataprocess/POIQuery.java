@@ -52,7 +52,7 @@ public class POIQuery {
 
 		Statement stmt = null;
 		try {
-			stmt = con.createStatement();
+//			stmt = con.createStatement();
 			stmt = con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
 					ResultSet.CONCUR_UPDATABLE);
 			ResultSet poiq = stmt

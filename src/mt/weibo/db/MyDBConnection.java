@@ -42,10 +42,20 @@ public class MyDBConnection {
 		this.password = password;
 		init();
 	}
-	
+
+	public MyDBConnection(String url) {
+		this.url = url;
+		init();
+	}
+
+	public MyDBConnection(int port) {
+		this.url = "jdbc:postgresql://localhost:" + port + "/microblog";
+		init();
+	}
+
 	public void init() {
 		try {
-			if(con == null){
+			if (con == null) {
 				con = DriverManager.getConnection(url, user, password);
 			}
 		} catch (SQLException e) {

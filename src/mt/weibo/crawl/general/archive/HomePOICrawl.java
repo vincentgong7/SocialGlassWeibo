@@ -1,4 +1,4 @@
-package mt.weibo.crawl.general.dataprocess;
+package mt.weibo.crawl.general.archive;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

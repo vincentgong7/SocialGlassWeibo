@@ -1,4 +1,4 @@
-package mt.weibo.crawl.general.dataprocess;
+package mt.weibo.crawl.general.dataprocess.poi;
 
 import java.io.File;
 import java.sql.PreparedStatement;

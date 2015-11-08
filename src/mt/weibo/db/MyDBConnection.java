@@ -6,9 +6,7 @@ package mt.weibo.db;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 /**
  * @author vincentgong
@@ -17,8 +15,6 @@ import java.sql.Statement;
 public class MyDBConnection {
 
 	Connection con = null;
-	Statement st = null;
-	ResultSet rs = null;
 
 	String url = "jdbc:postgresql://localhost:5432/microblog";
 	String user = "postgres";
@@ -66,12 +62,6 @@ public class MyDBConnection {
 
 	public void close() {
 		try {
-			if (rs != null) {
-				rs.close();
-			}
-			if (st != null) {
-				st.close();
-			}
 			if (con != null) {
 				con.close();
 			}

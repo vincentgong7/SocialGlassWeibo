@@ -1,4 +1,4 @@
-package mt.weibo.crawl.general.dataprocess;
+package mt.weibo.crawl.general.dataprocess.poi;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

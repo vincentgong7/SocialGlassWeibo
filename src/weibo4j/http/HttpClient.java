@@ -395,7 +395,7 @@ public class HttpClient implements java.io.Serializable {
 			}
 			Response response = new Response();
 			response.setResponseAsString(method.getResponseBodyAsString());
-			log(response.toString() + "\n");
+//			log(response.toString() + "\n");
 
 			if (responseCode != OK)
 			{

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import mt.weibo.crawl.experiment.ExpUtils;
+import mt.weibo.crawl.general.CrawlTool;
 import weibo4j.http.Response;
 import weibo4j.org.json.JSONArray;
 import weibo4j.org.json.JSONException;
@@ -26,10 +28,10 @@ public class Places extends WeiboResponse {
 	private double lat;// 纬度
 	private String category;
 	private String city;
-	//----add by Vincent
+	// ----add by Vincent
 	private String county = "	";
 	private District district;
-	//----
+	// ----
 	private String province;
 	private String country;
 	private String url;
@@ -60,11 +62,17 @@ public class Places extends WeiboResponse {
 			lat = json.getDouble("lat");
 			category = json.getString("category");
 			city = json.getString("city");
-			//---added by Vincent
-			if(json.has("district_info")){
-				district = new District(json.getJSONObject("district_info"));
+			// ---added by Vincent
+			try {
+				if (json.has("district_info")) {
+					district = new District(json.getJSONObject("district_info"));
+				}
+			} catch (JSONException jsone) {
+				jsone.printStackTrace();
+//				ExpUtils.mylog(CrawlTool.splitFileNameByHour("./log-district-error.txt"), json.toString());
+				district = null;
 			}
-			//---
+			// ---
 			province = json.getString("privince");
 			country = json.getString("country");
 			url = json.getString("url");
@@ -96,11 +104,17 @@ public class Places extends WeiboResponse {
 			lat = json.getDouble("lat");
 			category = json.getString("category");
 			city = json.getString("city");
-			//---added by Vincent
-			if(json.has("district_info")){
-				district = new District(json.getJSONObject("district_info"));
+			// ---added by Vincent
+			try {
+				if (json.has("district_info")) {
+					district = new District(json.getJSONObject("district_info"));
+				}
+			} catch (JSONException jsone) {
+				jsone.printStackTrace();
+//				ExpUtils.mylog(CrawlTool.splitFileNameByHour("./log-district-error.txt"), json.toString());
+				district = null;
 			}
-			//---
+			// ---
 			province = json.getString("privince");
 			country = json.getString("country");
 			url = json.getString("url");
@@ -343,29 +357,17 @@ public class Places extends WeiboResponse {
 
 	@Override
 	public String toString() {
-		return "Place [" + "poiid=" + poiid
-				+ ",title=" + title 
-				+ ",address=" + address 
-				+ ",lon=" + lon 
-				+ ",lat=" + lat 
-				+ ",category=" + category 
-				+ ",city=" + city 
-				+ ",province=" + province
-				+ ",country=" + country
-				+ ",url=" + url
-				+ ",phone=" + phone
-				+ ",postcode=" + postcode 
-				+ ",weiboId=" + weiboId
-				+ ",categorys=" + categorys 
-				+ ",categoryName=" + categoryName
-				+ ",icon=" + icon
-				+ ",checkinUserNum=" + checkinUserNum
-				+ ",checkinTime=" + checkinTime
-				+ ",tip_num=" + tipNum
-				+ ",photo_num=" + photoNum
-				+ ",todo_num=" + todoNum
-				+ ",distance=" + distance
-				+ ",total_number=" + totalNumber + "]";
+		return "Place [" + "poiid=" + poiid + ",title=" + title + ",address="
+				+ address + ",lon=" + lon + ",lat=" + lat + ",category="
+				+ category + ",city=" + city + ",province=" + province
+				+ ",country=" + country + ",url=" + url + ",phone=" + phone
+				+ ",postcode=" + postcode + ",weiboId=" + weiboId
+				+ ",categorys=" + categorys + ",categoryName=" + categoryName
+				+ ",icon=" + icon + ",checkinUserNum=" + checkinUserNum
+				+ ",checkinTime=" + checkinTime + ",tip_num=" + tipNum
+				+ ",photo_num=" + photoNum + ",todo_num=" + todoNum
+				+ ",distance=" + distance + ",total_number=" + totalNumber
+				+ "]";
 	}
 
 }

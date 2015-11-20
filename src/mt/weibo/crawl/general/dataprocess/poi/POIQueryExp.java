@@ -43,7 +43,8 @@ public class POIQueryExp {
 	private Long lastMill = 0l;
 
 	public static void main(String[] args) {
-		// usage: java -jar poi_query_exp.jar [weight|distance|checkin] interval appkey_file_name
+		// usage: java -jar poi_query_exp.jar [weight|distance|checkin] interval
+		// appkey_file_name
 		// example: java -jar poi_query_exp.jar distance 5 appkey.txt
 		int port = 5432;
 		int sort = 0;
@@ -62,7 +63,7 @@ public class POIQueryExp {
 						.println("usage: java -jar POIQueryExp.jar [weight|distance|checkin]");
 			}
 			interval = Integer.valueOf(args[1]);
-			if(args.length == 3){
+			if (args.length == 3) {
 				appkeyFile = args[2];
 				AppKeyCenter.getInstance(appkeyFile);
 			}
@@ -120,9 +121,10 @@ public class POIQueryExp {
 				double longi = postInS.getDouble("lon");
 
 				System.out.println();
-				System.out.println("Starting crawl: post_id=" + post_id
+				System.out.println("Starting crawl: sort = " + this.sort
+						+ ", count = " + count + ", post_id=" + post_id
 						+ ", user_id=" + user_id);
-				
+
 				sleepOrNot();
 				// CrawlTool.sleep(this.interval, "[POIID]");
 
@@ -209,7 +211,7 @@ public class POIQueryExp {
 		map.put("count", String.valueOf(count));
 		// map.put("range", crawlRange);
 
-		System.out.println(map.toString());
+		// System.out.println(map.toString());
 
 		String json = CrawlTool.autoCrawl(api, map, logFileName);
 		List<Places> poiList = constructPlaces(json);
@@ -241,7 +243,7 @@ public class POIQueryExp {
 	private void insertPoiInfo(Places place) {
 		PoiDB pdb = new PoiDB();
 		pdb.insertPOI(place, poiTableName);
-		if(place.getDistrict() != null){
+		if (place.getDistrict() != null) {
 			pdb.insertDistrictFromPOI(place, distriTableName);
 		}
 		// pdb.insertPOICat();

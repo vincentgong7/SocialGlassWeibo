@@ -20,5 +20,6 @@
 	<classpathentry kind="lib" path="lib/faceppsdk.jar"/>
 	<classpathentry kind="lib" path="lib/faceppsdk_min.jar"/>
 	<classpathentry kind="lib" path="lib/geohash-1.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/commons-cli-1.3.1.jar" sourcepath="lib/commons-cli-1.3.1-javadoc.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

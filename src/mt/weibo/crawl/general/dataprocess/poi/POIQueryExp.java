@@ -99,7 +99,7 @@ public class POIQueryExp {
 			// stmt = con.createStatement();
 			stmt = con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
 					ResultSet.CONCUR_UPDATABLE);
-			MyDB.init(port);
+//			MyDB.init(port);
 			String querySql = "SELECT post_id, user_id, lat, lon FROM "
 					+ statusTableName
 					+ " where user_id not in (select distinct user_id from "
@@ -182,7 +182,6 @@ public class POIQueryExp {
 			if (mdbc != null) {
 				mdbc.close();
 			}
-
 		}
 	}
 

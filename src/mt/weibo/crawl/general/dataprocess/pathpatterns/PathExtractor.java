@@ -1,6 +1,9 @@
 package mt.weibo.crawl.general.dataprocess.pathpatterns;
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -16,6 +19,7 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import mt.weibo.crawl.ArgsTemplate;
+import mt.weibo.crawl.general.dataprocess.common.DataProcessUtils;
 import mt.weibo.db.MyDBConnection;
 
 import org.apache.commons.cli.CommandLine;
@@ -35,8 +39,7 @@ public class PathExtractor {
 	private Connection con;
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		int port = 5432;
+		int port = 9530;
 
 		Options options = new Options();
 		options.addOption("h", "help", false, "print this message");
@@ -66,7 +69,7 @@ public class PathExtractor {
 	public PathExtractor(int port) {
 		this.port = port;
 		if (mdbc == null) {
-			mdbc = new MyDBConnection(port);
+			mdbc = new MyDBConnection(this.port);
 			con = mdbc.getDBConnection();
 		}
 	}
@@ -89,7 +92,6 @@ public class PathExtractor {
 			}
 			userRS.close();
 
-			//
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
@@ -137,8 +139,11 @@ public class PathExtractor {
 			// step 5: order the List
 			Map<String, List<Visit>> orderedFilteredVisitMapByDays = orderDayVisits(filteredVisitMapByDays);
 			
-			// step 6: iterator each list in the map, and generate the paths item, store them into the db
-			generateStorePathItem(orderedFilteredVisitMapByDays);
+			// step 6: iterator each list in the map, and generate the paths item
+			List<Path> pathItemList = generateStorePathItem(orderedFilteredVisitMapByDays);
+			
+			// step 7: store them into the db
+			StorePathItems(pathItemList);
 			
 			System.out.println("done!");
 			
@@ -158,16 +163,57 @@ public class PathExtractor {
 		}
 	}
 
-	private void generateStorePathItem(
+	private List<Path> generateStorePathItem(
 			Map<String, List<Visit>> orderedFilteredVisitMapByDays) {
+		List<Path> pathItemList = new ArrayList<Path>();
 		Iterator<String> it = orderedFilteredVisitMapByDays.keySet().iterator();
 		while(it.hasNext()){
 			String dayKey = it.next();
 			List<Visit> visitList = orderedFilteredVisitMapByDays.get(dayKey);
 			// TODO: iterator the list
+			String path = "";
+			for(Visit v: visitList){
+				String user_id = v.getUser_id();
+				path = path + "," + v.getPost_id();
+				String checksum = "";
+				try {
+					checksum = DataProcessUtils.makeSHA1Hash(path);
+				} catch (NoSuchAlgorithmException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (UnsupportedEncodingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				Path pathItem = new Path(user_id, dayKey, checksum, path);
+				pathItemList.add(pathItem);
+			}
+		}
+		return pathItemList;
+	}
+
+	private void StorePathItems(List<Path> list) {
+		String sql = "insert into "
+				+ this.pathTableName
+				+ " (user_id, day, checksum, path) values (?,?,?,?)";
+		System.out.println(sql);
+		try {
+			PreparedStatement inserPoiListPs = con
+					.prepareStatement(sql);
 			
-			// TODO: store them into path table
+			for(Path p: list){
+				inserPoiListPs.setString(1, p.getUser_id());
+				inserPoiListPs.setString(2, p.getDay());
+				inserPoiListPs.setString(3, p.getChecksum());
+				inserPoiListPs.setString(4, p.getPath());
+				inserPoiListPs.executeUpdate();
+			}
 			
+			inserPoiListPs.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return;
 		}
 	}
 

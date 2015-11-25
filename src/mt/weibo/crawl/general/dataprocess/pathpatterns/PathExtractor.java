@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-import mt.weibo.crawl.ArgsTemplate;
 import mt.weibo.crawl.general.dataprocess.common.DataProcessUtils;
 import mt.weibo.db.MyDBConnection;
 
@@ -39,7 +38,7 @@ public class PathExtractor {
 	private Connection con;
 
 	public static void main(String[] args) {
-		int port = 9530;
+		int port = 5432;
 
 		Options options = new Options();
 		options.addOption("h", "help", false, "print this message");
@@ -51,19 +50,21 @@ public class PathExtractor {
 
 			if (cmd.hasOption("help")) {
 				HelpFormatter formatter = new HelpFormatter();
-				formatter.printHelp(ArgsTemplate.class.getName(), options);
-			}
+				formatter.printHelp(PathExtractor.class.getName(), options);
+			} else 
 			if (cmd.hasOption("p")) {
 				if (cmd.getOptionValue("p") != null) {
 					port = Integer.valueOf(cmd.getOptionValue("p"));
+					PathExtractor pe = new PathExtractor(port);
+					pe.process();
 				}
+			} else {
+				PathExtractor pe = new PathExtractor(port);
+				pe.process();
 			}
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
-
-		PathExtractor pe = new PathExtractor(port);
-		pe.process();
 	}
 
 	public PathExtractor(int port) {
@@ -76,18 +77,24 @@ public class PathExtractor {
 
 	private void process() {
 		// step 1: get user_id, in the scope
+		System.out.println("Start extracting...");
+
 		Statement stmt = null;
 		try {
-
 			stmt = con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
 					ResultSet.CONCUR_UPDATABLE);
 
 			String querySql = "select distinct user_id from "
-					+ this.userTableName + ")";
-
+					+ this.userTableName
+					+ " where user_id not in (select distinct user_id from "
+					+ this.pathTableName + " )";
+			System.out.println(querySql);
 			ResultSet userRS = stmt.executeQuery(querySql);
+			int npUserId = 0;
 			while (userRS.next()) {
 				String user_id = userRS.getString("user_id");
+				npUserId++;
+				System.out.println("Now processing number: " + npUserId);
 				extractPathForUser(user_id);
 			}
 			userRS.close();
@@ -109,6 +116,8 @@ public class PathExtractor {
 	}
 
 	private void extractPathForUser(String user_id) {
+		System.out.println("[Now Processing user_id]: " + user_id);
+
 		// step 2: get places for this user
 		List<Visit> visitList = new ArrayList<Visit>();
 		Statement stmt = null;
@@ -124,29 +133,31 @@ public class PathExtractor {
 				String post_id = postOfUser.getString("post_id");
 				String poiid = postOfUser.getString("poiid");
 				Long timestamp = postOfUser.getLong("timestamp");
-				
+
 				Visit visit = new Visit(post_id, user_id, poiid, timestamp);
 				visitList.add(visit);
 			}
 			postOfUser.close();
-			
+
 			// step 3: day spliter
 			Map<String, List<Visit>> visitMapByDays = daySpliter(visitList);
-			
-			// step 4: dedu the daymap, delete the visit if it has only one in o day
-			Map<String, List<Visit>> filteredVisitMapByDays =  filteDayVisits(visitMapByDays);
-			
+
+			// step 4: dedu the daymap, delete the visit if it has only one in o
+			// day
+			Map<String, List<Visit>> filteredVisitMapByDays = filteDayVisits(visitMapByDays);
+
 			// step 5: order the List
 			Map<String, List<Visit>> orderedFilteredVisitMapByDays = orderDayVisits(filteredVisitMapByDays);
-			
-			// step 6: iterator each list in the map, and generate the paths item
+
+			// step 6: iterator each list in the map, and generate the paths
+			// item
 			List<Path> pathItemList = generateStorePathItem(orderedFilteredVisitMapByDays);
-			
+
 			// step 7: store them into the db
 			StorePathItems(pathItemList);
-			
+
 			System.out.println("done!");
-			
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
@@ -157,9 +168,6 @@ public class PathExtractor {
 					e.printStackTrace();
 				}
 			}
-			if (mdbc != null) {
-				mdbc.close();
-			}
 		}
 	}
 
@@ -167,26 +175,30 @@ public class PathExtractor {
 			Map<String, List<Visit>> orderedFilteredVisitMapByDays) {
 		List<Path> pathItemList = new ArrayList<Path>();
 		Iterator<String> it = orderedFilteredVisitMapByDays.keySet().iterator();
-		while(it.hasNext()){
+		while (it.hasNext()) {
 			String dayKey = it.next();
 			List<Visit> visitList = orderedFilteredVisitMapByDays.get(dayKey);
-			// TODO: iterator the list
 			String path = "";
-			for(Visit v: visitList){
+			int pathLength = 0;
+			for (Visit v : visitList) {
 				String user_id = v.getUser_id();
 				path = path + "," + v.getPost_id();
+				pathLength++;
+				if (path.startsWith(",")) {
+					// ",xxxx,tttt,yyyy" to "xxxx,tttt,yyyy"
+					path = path.substring(1);
+				}
 				String checksum = "";
 				try {
 					checksum = DataProcessUtils.makeSHA1Hash(path);
 				} catch (NoSuchAlgorithmException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (UnsupportedEncodingException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
-				Path pathItem = new Path(user_id, dayKey, checksum, path);
+
+				Path pathItem = new Path(user_id, dayKey, checksum, pathLength,
+						path);
 				pathItemList.add(pathItem);
 			}
 		}
@@ -194,95 +206,114 @@ public class PathExtractor {
 	}
 
 	private void StorePathItems(List<Path> list) {
+		if (list.size() < 1) {
+			return;
+		}
+
 		String sql = "insert into "
 				+ this.pathTableName
-				+ " (user_id, day, checksum, path) values (?,?,?,?)";
+				+ " (user_id, day, checksum, path, path_length) values (?,?,?,?,?)";
 		System.out.println(sql);
 		try {
-			PreparedStatement inserPoiListPs = con
-					.prepareStatement(sql);
-			
-			for(Path p: list){
-				inserPoiListPs.setString(1, p.getUser_id());
-				inserPoiListPs.setString(2, p.getDay());
-				inserPoiListPs.setString(3, p.getChecksum());
-				inserPoiListPs.setString(4, p.getPath());
-				inserPoiListPs.executeUpdate();
+			PreparedStatement inserPoiListPs = con.prepareStatement(sql);
+
+			for (Path p : list) {
+				try {
+					inserPoiListPs.setString(1, p.getUser_id());
+					inserPoiListPs.setString(2, p.getDay());
+					inserPoiListPs.setString(3, p.getChecksum());
+					inserPoiListPs.setString(4, p.getPath());
+					inserPoiListPs.setInt(5, p.getPath_length());
+					inserPoiListPs.executeUpdate();
+				} catch (SQLException e) {
+					if (e.getMessage() != null
+							&& e.getMessage()
+									.contains(
+											"violates unique constraint \"path_in_scope_pkey\"")) {
+						System.err.println(e.getMessage());
+						System.out.println();
+					} else {
+						e.printStackTrace();
+					}
+					continue;
+				}
+
 			}
-			
 			inserPoiListPs.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return;
 		}
 	}
 
 	private Map<String, List<Visit>> orderDayVisits(
 			Map<String, List<Visit>> filteredVisitMapByDays) {
 		Map<String, List<Visit>> map = new HashMap<String, List<Visit>>();
-		
+
 		Iterator<String> it = filteredVisitMapByDays.keySet().iterator();
-		while(it.hasNext()){
+		while (it.hasNext()) {
 			String dayKey = it.next();
 			List<Visit> visitList = filteredVisitMapByDays.get(dayKey);
-			Comparator<Visit> comparator = new Comparator<Visit>(){
+			Comparator<Visit> comparator = new Comparator<Visit>() {
 
 				@Override
 				public int compare(Visit o1, Visit o2) {
-					long result = o2.getTimestamp() - o1.getTimestamp();
-					if(result>0){
+					long result = o1.getTimestamp() - o2.getTimestamp();
+					if (result > 0) {
 						return 1;
-					}else{
+					} else {
 						return -1;
 					}
 				}
 			};
-			
+
 			Collections.sort(visitList, comparator);
 			map.put(dayKey, visitList);
 		}
 		return map;
 	}
 
-	private Map<String, List<Visit>> filteDayVisits(Map<String, List<Visit>> visitMapByDays) {
+	private Map<String, List<Visit>> filteDayVisits(
+			Map<String, List<Visit>> visitMapByDays) {
 		Map<String, List<Visit>> map = new HashMap<String, List<Visit>>();
 		Iterator<String> it = visitMapByDays.keySet().iterator();
-		while(it.hasNext()){
+		while (it.hasNext()) {
 			String dayKey = it.next();
 			List<Visit> l = visitMapByDays.get(dayKey);
 			Map<String, Visit> placeMap = new HashMap<String, Visit>();
-			for(Visit v: l){
+			for (Visit v : l) {
 				String poiid = v.getPoiid();
-				if(!placeMap.containsKey(poiid)){
+				if (!placeMap.containsKey(poiid)) {
 					placeMap.put(poiid, v);
 				}
 			}
-			
+
 			List<Visit> poiList = new ArrayList<Visit>();
 			Iterator<String> itt = placeMap.keySet().iterator();
-			while(itt.hasNext()){
+			while (itt.hasNext()) {
 				String key = itt.next();
 				Visit v = placeMap.get(key);
 				poiList.add(v);
 			}
 			int size = poiList.size();
-			if(size > 1){
+			if (size > 1) {
 				map.put(dayKey, poiList);
 			}
 		}
-		
+		if (map.size() > 0) {
+			System.out.println("multiple places.");
+		}
 		return map;
 	}
 
 	private Map<String, List<Visit>> daySpliter(List<Visit> visitList) {
 		Map<String, List<Visit>> dayMap = new HashMap<String, List<Visit>>();
-		for(Visit v: visitList){
+		for (Visit v : visitList) {
 			String day = getDay(v.getTimestamp());
-			if(dayMap.containsKey(day)){
+			if (dayMap.containsKey(day)) {
 				List<Visit> l = (List<Visit>) dayMap.get(day);
 				l.add(v);
 				dayMap.put(day, l);
-			}else{
+			} else {
 				List<Visit> l = new ArrayList<Visit>();
 				l.add(v);
 				dayMap.put(day, l);
@@ -292,10 +323,16 @@ public class PathExtractor {
 	}
 
 	private String getDay(Long timestamp) {
-		Date date = new Date(timestamp*1000L); // *1000 is to convert seconds to milliseconds
-//		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z"); // the format of your date
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // the format of your date
-		sdf.setTimeZone(TimeZone.getTimeZone("GMT+8")); // give a timezone reference for formating
+		Date date = new Date(timestamp); // *1000 is to convert seconds to
+											// milliseconds
+		// SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
+		// // the format of your date
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // the format
+																	// of your
+																	// date
+		sdf.setTimeZone(TimeZone.getTimeZone("GMT+8")); // give a timezone
+														// reference for
+														// formating
 		String formattedDate = sdf.format(date);
 		System.out.println(formattedDate);
 		return formattedDate;

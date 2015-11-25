@@ -81,9 +81,16 @@ public class Test {
 //		getGeoInfo("{\"type\":\"Point\",\"coordinates\":[-20.068632,-57.519123]}");
 //		getGeoInfo("{\"type\":\"Point\",\"coordinates\":[20.068632,-57.519123]}");
 //		getGeoInfo("{\"type\":\"Point\",\"coordinates\":[20.068632,57.519123]}");
-		keyTest("appkey1.txt");
+//		keyTest("appkey1.txt");
+		matchTest();
 	}
 	
+	private static void matchTest() {
+		String content = "<U+1F341>現在連140個字都蹦不出來的我，其實心裡都藏有些<U+1F341>話，儘管難受，也不必「自哀自憐」！有個人教會我「不抱怨」有個<U+1F341>人教會我「笑一 <U+1F341>" ;
+		content = content.replaceAll("<U+.*?>", "");
+		System.out.println(content);
+	}
+
 	private static void getGeoInfo(String geo) {
 		String pattern = "[-]{0,1}[0-9]+\\.{0,1}[0-9]*,[-]{0,1}[0-9]+\\.{0,1}[0-9]*";
 		Pattern r = Pattern.compile(pattern);

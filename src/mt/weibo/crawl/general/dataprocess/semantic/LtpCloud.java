@@ -40,9 +40,8 @@ public class LtpCloud {
 		}
 		return instance;
 	}
-
-	public List<Word> detect(String text) {
-		List<Word> list = new ArrayList<Word>();
+	
+	public String detectForJson(String text){
 		MyStringBuffer msb = new MyStringBuffer();
 		try {
 			text = URLEncoder.encode(text, "utf-8");
@@ -70,6 +69,13 @@ public class LtpCloud {
 		}
 
 		String json = msb.toString();
+		return json;
+	}
+
+	public List<Word> detect(String text) {
+		List<Word> list = new ArrayList<Word>();
+		
+		String json = detectForJson(text);
 		System.out.println(json);
 		list = getWordList(json);
 

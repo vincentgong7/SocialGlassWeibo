@@ -5,12 +5,14 @@ public class Path {
 	private String day;
 	private String checksum;
 	private String path;
+	private int path_length;
 	
-	public Path(String user_id, String day, String checksum, String path){
+	public Path(String user_id, String day, String checksum, int path_length, String path){
 		this.user_id = user_id;
 		this.day = day;
 		this.checksum = checksum;
 		this.path = path;
+		this.path_length = path_length;
 	}
 
 	public String getUser_id() {
@@ -43,6 +45,14 @@ public class Path {
 
 	public void setPath(String path) {
 		this.path = path;
+	}
+
+	public int getPath_length() {
+		return path_length;
+	}
+
+	public void setPath_length(int path_length) {
+		this.path_length = path_length;
 	}
 	
 	

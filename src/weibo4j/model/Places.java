@@ -73,7 +73,7 @@ public class Places extends WeiboResponse {
 				district = null;
 			}
 			// ---
-			province = json.getString("privince");
+			province = json.getString("province");
 			country = json.getString("country");
 			url = json.getString("url");
 			phone = json.getString("url");

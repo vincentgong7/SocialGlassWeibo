@@ -42,8 +42,8 @@ public class PoiDB {
 				+ " (poiid, title, address, lat, lon, "
 				+ "category, county, city, province, country,"
 				+ "url, postcode, categorys_path, category_name, icon,"
-				+ "checkin_num, checkin_user_num, tip_num, photo_num, todo_num, distance)"
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				+ "checkin_num, checkin_user_num, tip_num, photo_num, todo_num, distance, district_id)"
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 		try {
 			preparedStatement = mdbc.getPrepareStatement(insertTableSQL);
@@ -71,6 +71,7 @@ public class PoiDB {
 			preparedStatement.setLong(19, p.getPhotoNum());
 			preparedStatement.setLong(20, p.getTodoNum());
 			preparedStatement.setLong(21, p.getDistance());
+			preparedStatement.setString(22, p.getDistrict().getDistrictID());
 
 			preparedStatement.executeUpdate();
 			preparedStatement.close();

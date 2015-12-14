@@ -89,6 +89,7 @@ public class Test {
 		String content = "<U+1F341>現在連140個字都蹦不出來的我，其實心裡都藏有些<U+1F341>話，儘管難受，也不必「自哀自憐」！有個人教會我「不抱怨」有個<U+1F341>人教會我「笑一 <U+1F341>" ;
 		content = content.replaceAll("<U+.*?>", "");
 		System.out.println(content);
+		System.out.println("done");
 	}
 
 	private static void getGeoInfo(String geo) {

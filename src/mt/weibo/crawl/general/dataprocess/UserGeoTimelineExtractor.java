@@ -17,7 +17,6 @@ public class UserGeoTimelineExtractor {
 	private String postTableName;
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		UserGeoTimelineExtractor upe = new UserGeoTimelineExtractor();
 		// upe.setInputFolderOrFile("D:/documents/Dropbox/TUD/Master TUD/A Master Thesis/share/IPX/2ndZhen/crawldata/mylog-workstation/mylog2015sep-Userpost/json/post-json-2015090817.txt");
 		// upe.setInputFolderOrFile("/Users/vincentgong/Documents/TUD/Master TUD/A Master Thesis/share/IPX/2zhen/crawldata/mylog-workdesk/userpost-sep10/json/post-json-2015090817.txt");

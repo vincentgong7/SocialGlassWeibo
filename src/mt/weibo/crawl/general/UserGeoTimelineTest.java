@@ -111,8 +111,8 @@ public class UserGeoTimelineTest {
 				}
 				page = 0; // because later there will be page++
 			}
-			if (isResultEmpty) {
-				// empty result get, goto next id, page = 1
+			if (isResultEmpty || page>this.maxPageCount) {
+				// empty result get or page > max page, goto next id, page = 1
 				System.out.println("The result is empty.");
 				currentUid = getNextUidTillEnd(currentUid);
 				page = 0;

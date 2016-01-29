@@ -18,6 +18,7 @@ public class Visit {
 		this.poiid = poiid;
 		this.timestamp = timestamp;
 	}
+	
 	public String getPost_id() {
 		return post_id;
 	}

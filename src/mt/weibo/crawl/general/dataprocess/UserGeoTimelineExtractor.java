@@ -1,11 +1,14 @@
 package mt.weibo.crawl.general.dataprocess;
 
 import java.io.File;
+import java.util.Iterator;
 import java.util.List;
 
 import mt.weibo.common.MyLineReader;
+import mt.weibo.common.MyLineWriter;
 import mt.weibo.db.StatusDB;
 import weibo4j.model.Status;
+import weibo4j.model.User;
 
 public class UserGeoTimelineExtractor {
 
@@ -19,10 +22,11 @@ public class UserGeoTimelineExtractor {
 	public static void main(String[] args) {
 		UserGeoTimelineExtractor upe = new UserGeoTimelineExtractor();
 		// upe.setInputFolderOrFile("D:/documents/Dropbox/TUD/Master TUD/A Master Thesis/share/IPX/2ndZhen/crawldata/mylog-workstation/mylog2015sep-Userpost/json/post-json-2015090817.txt");
-		// upe.setInputFolderOrFile("/Users/vincentgong/Documents/TUD/Master TUD/A Master Thesis/share/IPX/2zhen/crawldata/mylog-workdesk/userpost-sep10/json/post-json-2015090817.txt");
-		
+//		 upe.setInputFolderOrFile("/Users/vincentgong/Documents/TUD/Master TUD/A Master Thesis/share/IPX/2zhen/crawldata/mylog-workdesk/userpost-sep10/json/post-json-2015090817.txt");
+		 
 		// command: java -jar UserGeoTimelineExtractor localhost microblog postgres postgres post_file.json
 		upe.setInputFolderOrFile(args[4]);
+		
 		// upe.setDB("jdbc:postgresql://localhost/microblog", "postgres",
 		// "postgres",
 		// "socialmedia.user", "socialmedia.post");
@@ -71,8 +75,8 @@ public class UserGeoTimelineExtractor {
 
 				// insert one-line-status into Status table
 
-				sdb.insertStatusList(statusList); // insert the statuses into
-				// // table
+				sdb.insertStatusList(statusList); // insert the statuses into table
+
 				sdb.insertUserOnlyOnceFromStatusList(statusList); // insert the
 																	// user of
 																	// this line
@@ -81,7 +85,6 @@ public class UserGeoTimelineExtractor {
 																	// only one
 																	// user is
 																	// inserted
-
 			}
 			sdb.close();
 			mlr.close();
@@ -108,4 +111,5 @@ public class UserGeoTimelineExtractor {
 		// TODO Auto-generated method stub
 
 	}
+	
 }

@@ -44,6 +44,11 @@ public class MyDBConnection {
 		init();
 	}
 
+	public MyDBConnection(int port, String db) {
+		this.url = "jdbc:postgresql://localhost:" + port + "/" + db;
+		init();
+	}
+	
 	public MyDBConnection(int port) {
 		this.url = "jdbc:postgresql://localhost:" + port + "/microblog";
 		init();

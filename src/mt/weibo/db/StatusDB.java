@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import mt.weibo.common.LocationSeparator;
+import mt.weibo.common.MyLineWriter;
 import mt.weibo.common.Utils;
 import weibo4j.model.Status;
 import weibo4j.model.StatusWapper;
@@ -78,6 +79,27 @@ public class StatusDB {
 			if (!st.isDeleted()) {
 				User user = st.getUser();
 				InsertUser(user);
+				return;
+			}
+		}
+	}
+	
+	public void exportUserVerifiedTypeOnlyOnceFromStatusList(List<Status> statusList, String filepath) {
+		Iterator<Status> it = statusList.iterator();
+		while (it.hasNext()) {
+			Status st = it.next();
+			if (!st.isDeleted()) {
+				User user = st.getUser();
+				String userID = user.getId();
+				int userVerifiedType = user.getverifiedType();
+				String line = userID + "," + userVerifiedType;
+				try {
+					MyLineWriter.getInstance().writeLine(filepath, line);
+					System.out.println(line);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				return;
 			}
 		}

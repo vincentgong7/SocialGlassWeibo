@@ -13,9 +13,6 @@ import java.util.Properties;
 import mt.weibo.common.Utils;
 import mt.weibo.crawl.experiment.ExpUtils;
 import mt.weibo.db.StatusDB;
-
-import org.apache.commons.lang.StringEscapeUtils;
-
 import weibo4j.model.Status;
 import weibo4j.model.WeiboException;
 
@@ -104,9 +101,10 @@ public class UserGeoTimeline {
 				}
 				page = 0; // because later there will be page++
 			}
-			if (isResultEmpty) {
-				// empty result get, goto next id, page = 1
-				System.out.println("The result is empty.");
+			if (isResultEmpty || page + 1 >this.maxPageCount) {
+				// if empty result get, or page > max page 
+				// goto next id, page = 1
+				System.out.println("The result is empty, or page > max page = " + this.maxPageCount);
 				currentUid = getNextUidTillEnd(currentUid);
 				page = 0;
 

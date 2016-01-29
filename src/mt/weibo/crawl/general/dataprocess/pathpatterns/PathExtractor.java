@@ -14,8 +14,10 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.TimeZone;
 
 import mt.weibo.crawl.general.dataprocess.common.DataProcessUtils;
@@ -33,16 +35,19 @@ public class PathExtractor {
 	private int port = 5432;
 	private String statusTableName = "socialmedia.post_in_scope";
 	private String userTableName = "socialmedia.user_in_scope";
-	private String pathTableName = "socialmedia.path_in_scope";
+	private String pathTableName = "socialmedia.path_in_scope_2";
+	private String dbname = "shenzhen";
 	private MyDBConnection mdbc;
 	private Connection con;
 
 	public static void main(String[] args) {
 		int port = 5432;
+		String dbname = "shenzhen";
 
 		Options options = new Options();
 		options.addOption("h", "help", false, "print this message");
 		options.addOption("p", true, "database port");
+		options.addOption("d", true, "database name");
 		CommandLineParser parser = new DefaultParser();
 		CommandLine cmd;
 		try {
@@ -51,26 +56,34 @@ public class PathExtractor {
 			if (cmd.hasOption("help")) {
 				HelpFormatter formatter = new HelpFormatter();
 				formatter.printHelp(PathExtractor.class.getName(), options);
-			} else 
-			if (cmd.hasOption("p")) {
-				if (cmd.getOptionValue("p") != null) {
-					port = Integer.valueOf(cmd.getOptionValue("p"));
-					PathExtractor pe = new PathExtractor(port);
-					pe.process();
-				}
 			} else {
-				PathExtractor pe = new PathExtractor(port);
+				if (cmd.hasOption("p")) {
+					if (cmd.getOptionValue("p") != null) {
+						port = Integer.valueOf(cmd.getOptionValue("p"));
+
+					}
+				}
+
+				if (cmd.hasOption("d")) {
+					if (cmd.getOptionValue("d") != null) {
+						dbname = cmd.getOptionValue("d");
+					}
+				}
+
+				PathExtractor pe = new PathExtractor(port, dbname);
 				pe.process();
 			}
+
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public PathExtractor(int port) {
+	public PathExtractor(int port, String dbname) {
 		this.port = port;
+		this.dbname = dbname;
 		if (mdbc == null) {
-			mdbc = new MyDBConnection(this.port);
+			mdbc = new MyDBConnection(this.port, this.dbname);
 			con = mdbc.getDBConnection();
 		}
 	}
@@ -151,7 +164,9 @@ public class PathExtractor {
 
 			// step 6: iterator each list in the map, and generate the paths
 			// item
-			List<Path> pathItemList = generateStorePathItem(orderedFilteredVisitMapByDays);
+//			List<Path> pathItemList = generateStorePathItem(orderedFilteredVisitMapByDays);
+			List<Path> pathItemList = pathItemGenerator(orderedFilteredVisitMapByDays);
+			
 
 			// step 7: store them into the db
 			StorePathItems(pathItemList);
@@ -178,12 +193,18 @@ public class PathExtractor {
 		while (it.hasNext()) {
 			String dayKey = it.next();
 			List<Visit> visitList = orderedFilteredVisitMapByDays.get(dayKey);
+			int npPlaces = visitList.size();
 			String path = "";
 			int pathLength = 0;
+			boolean isFullPath;
 			for (Visit v : visitList) {
+				isFullPath = false;
 				String user_id = v.getUser_id();
-				path = path + "," + v.getPost_id();
+				path = path + "," + v.getPoiid();
 				pathLength++;
+				if (pathLength == npPlaces) {
+					isFullPath = true;
+				}
 				if (path.startsWith(",")) {
 					// ",xxxx,tttt,yyyy" to "xxxx,tttt,yyyy"
 					path = path.substring(1);
@@ -198,12 +219,65 @@ public class PathExtractor {
 				}
 
 				Path pathItem = new Path(user_id, dayKey, checksum, pathLength,
-						path);
+						path, isFullPath);
 				pathItemList.add(pathItem);
 			}
 		}
 		return pathItemList;
 	}
+	
+	
+	private List<Path> pathItemGenerator(
+			Map<String, List<Visit>> orderedFilteredVisitMapByDays) {
+		List<Path> pathItemList = new ArrayList<Path>();
+		
+		Iterator<String> it = orderedFilteredVisitMapByDays.keySet().iterator();
+		while (it.hasNext()) {
+			String dayKey = it.next();
+			List<Visit> visitList = orderedFilteredVisitMapByDays.get(dayKey);
+			int npPlaces = visitList.size();
+			
+			Queue<Visit> que = new LinkedList<Visit>();
+			for(Visit v : visitList){
+				que.add(v);
+			}
+			
+			List<Path> simplePathItemList = pathItemCalculator(que);
+			
+			for(Path p: simplePathItemList){
+				p.setDay(dayKey);
+				if (p.getPath_length() == npPlaces) {
+					p.setIs_full_path(true);
+				}
+				pathItemList.add(p);
+			}
+		}
+		
+		
+		return pathItemList;
+	}
+
+	private List<Path> pathItemCalculator(Queue<Visit> que) {
+		List<Path> CombinedPathItemList = new ArrayList<Path>();
+		List<Path> pathItemList = new ArrayList<Path>();;
+		Visit visit = que.poll();
+		CombinedPathItemList.add(new Path(visit));
+		if(!que.isEmpty()){
+			pathItemList = pathItemCalculator(que);
+			
+			for(Path p: pathItemList){
+				if(p.getPath_length()>1){
+					CombinedPathItemList.add(p);
+				}
+				Path combinePath = new Path(p, visit);
+				CombinedPathItemList.add(combinePath);
+			}
+		}
+		
+		return CombinedPathItemList;
+	}
+	
+	
 
 	private void StorePathItems(List<Path> list) {
 		if (list.size() < 1) {
@@ -212,7 +286,7 @@ public class PathExtractor {
 
 		String sql = "insert into "
 				+ this.pathTableName
-				+ " (user_id, day, checksum, path, path_length) values (?,?,?,?,?)";
+				+ " (user_id, day, checksum, path, path_length, is_full_path) values (?,?,?,?,?,?)";
 		System.out.println(sql);
 		try {
 			PreparedStatement inserPoiListPs = con.prepareStatement(sql);
@@ -224,6 +298,7 @@ public class PathExtractor {
 					inserPoiListPs.setString(3, p.getChecksum());
 					inserPoiListPs.setString(4, p.getPath());
 					inserPoiListPs.setInt(5, p.getPath_length());
+					inserPoiListPs.setBoolean(6, p.isIs_full_path());
 					inserPoiListPs.executeUpdate();
 				} catch (SQLException e) {
 					if (e.getMessage() != null

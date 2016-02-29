@@ -58,6 +58,13 @@ public class MyDB {
 		}
 	}
 	
+	
+	public static void init(int port, String dbname){
+		if(con == null) {
+			con = new MyDBConnection(port, dbname);
+		}
+	}
+	
 	public static ResultSet queryUpdate(String sql) throws SQLException{
 		init();
 		return con.getDBConnection().createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,

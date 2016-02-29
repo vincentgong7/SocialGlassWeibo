@@ -7,44 +7,51 @@ import java.util.Queue;
 
 public class TestPath {
 
+	List<Path> storeList = new ArrayList<Path>();
+	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		Visit v1 = new Visit("p1", "u1", "poi1", 0l);
-		Visit v2 = new Visit("p2", "u2", "poi2", 0l);
-		Visit v3 = new Visit("p3", "u3", "poi3", 0l);
-		Visit v4 = new Visit("p4", "u4", "poi4", 0l);
-		
+		TestPath tp = new TestPath();
+		Visit v1 = new Visit("a", "u1", "a", 0l, 0d);
+		Visit v2 = new Visit("b", "u2", "b", 0l, 0d);
+		Visit v3 = new Visit("c", "u3", "c", 0l, 0d);
+		Visit v4 = new Visit("d", "u4", "d", 0l, 0d);
+
 		Queue<Visit> que = new LinkedList<Visit>();
 		que.add(v1);
 		que.add(v2);
 		que.add(v3);
 		que.add(v4);
-		
-		List<Path> pathList = pathItemCalculator(que);
-		for(Path p: pathList){
+
+		tp.pathItemCalculator(que);
+		for (Path p : tp.storeList) {
 			System.out.println(p.getPath());
 		}
-		
+
 	}
 
-	private static List<Path> pathItemCalculator(Queue<Visit> que) {
+	private List<Path> pathItemCalculator(Queue<Visit> que) {
 		List<Path> CombinedPathItemList = new ArrayList<Path>();
-		List<Path> pathItemList = new ArrayList<Path>();;
-		Visit visit = que.poll();
-		CombinedPathItemList.add(new Path(visit));
-		if(!que.isEmpty()){
+		List<Path> pathItemList = new ArrayList<Path>();
+		if (!que.isEmpty()) {
+			Visit visit = que.poll();
+			//store(new Path(visit))
+			storeList.add(new Path(visit));
+			CombinedPathItemList.add(new Path(visit));
+
 			pathItemList = pathItemCalculator(que);
-			
-			for(Path p: pathItemList){
-				if(p.getPath_length()>1){
-					CombinedPathItemList.add(p);
-				}
-				Path combinePath = new Path(p, visit);
+
+			for (Path p : pathItemList) {
+
+				Path combinePath = new Path(visit, p); // v + p
+				//CombinedPathItemList.add(p);
+				//store(combinePath)
+				storeList.add(combinePath);
 				CombinedPathItemList.add(combinePath);
 			}
 		}
-		
+
 		return CombinedPathItemList;
 	}
-	
+
 }

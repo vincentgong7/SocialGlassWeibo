@@ -13,7 +13,7 @@ public class DedupUsers {
 	private Set<String> userSet;
 	public static void main(String[] args) {
 		DedupUsers du = new DedupUsers();
-		du.setFolder("/Users/vincentgong/Documents/TUD/Master TUD/A Master Thesis/share/workbench/saraExp/user_verified_type/result/origin/");
+		du.setFolder("/Users/vincentgong/Documents/TUD/Master TUD/A Master Thesis/share/workbench/saraExp/user_verified_type/final_result/origin/");
 		if(args.length >0 ) {
 			du.setFolder(args[0]);
 			System.out.println("Folder set: " + args[0]);

@@ -15,7 +15,7 @@ public class AddUserTypeIntoDB {
 	
 	public static void main(String[] args) throws SQLException {
 		// TODO Auto-generated method stub
-		int port = 9932;
+		int port = 5432;
 		String database = "shenzhen";
 		
 		AddUserTypeIntoDB ati = new AddUserTypeIntoDB(port, database);
@@ -41,7 +41,6 @@ public class AddUserTypeIntoDB {
 	}
 	
 	private void setFolder(String folder) {
-		// TODO Auto-generated method stub
 		this.folder = folder;
 	}
 	
@@ -63,6 +62,7 @@ public class AddUserTypeIntoDB {
 					String uid = line.split(",")[0];
 					int type = Integer.valueOf(line.split(",")[1]);
 					insertDB(uid, type);
+					i++;
 				}
 				
 			} catch (Exception e) {

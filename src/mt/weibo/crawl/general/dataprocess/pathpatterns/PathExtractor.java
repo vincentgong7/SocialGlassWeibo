@@ -1,7 +1,5 @@
 package mt.weibo.crawl.general.dataprocess.pathpatterns;
 
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -20,7 +18,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.TimeZone;
 
-import mt.weibo.crawl.general.dataprocess.common.DataProcessUtils;
 import mt.weibo.db.MyDBConnection;
 
 import org.apache.commons.cli.CommandLine;
@@ -33,12 +30,14 @@ import org.apache.commons.cli.ParseException;
 public class PathExtractor {
 
 	private int port = 5432;
-	private String statusTableName = "socialmedia.post_in_scope";
+	private String statusTableName = "socialmedia.post_in_scope_day_oy";
 	private String userTableName = "socialmedia.user_in_scope";
-	private String pathTableName = "socialmedia.path_in_scope_2";
+	private String pathTableName = "socialmedia.path_in_scope";
 	private String dbname = "shenzhen";
 	private MyDBConnection mdbc;
 	private Connection con;
+	
+	private List<Path> storeList;
 
 	public static void main(String[] args) {
 		int port = 5432;
@@ -77,6 +76,10 @@ public class PathExtractor {
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
+		
+		
+//		PathExtractor pe = new PathExtractor(port, dbname);
+//		pe.process();
 	}
 
 	public PathExtractor(int port, String dbname) {
@@ -137,8 +140,8 @@ public class PathExtractor {
 		try {
 			stmt = con.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
 					ResultSet.CONCUR_UPDATABLE);
-			String querySql = "SELECT post_id, poiid, timestamp FROM "
-					+ statusTableName + " where user_id = '" + user_id + "'";
+			String querySql = "SELECT post_id, poiid, timestamp, day_oy FROM "
+					+ statusTableName + " where user_id = '" + user_id + "' and poiid <> ''";
 
 			ResultSet postOfUser = stmt.executeQuery(querySql);
 
@@ -146,8 +149,9 @@ public class PathExtractor {
 				String post_id = postOfUser.getString("post_id");
 				String poiid = postOfUser.getString("poiid");
 				Long timestamp = postOfUser.getLong("timestamp");
-
-				Visit visit = new Visit(post_id, user_id, poiid, timestamp);
+				Double day_oy = postOfUser.getDouble("day_oy");;
+				
+				Visit visit = new Visit(post_id, user_id, poiid, timestamp, day_oy);
 				visitList.add(visit);
 			}
 			postOfUser.close();
@@ -167,6 +171,9 @@ public class PathExtractor {
 //			List<Path> pathItemList = generateStorePathItem(orderedFilteredVisitMapByDays);
 			List<Path> pathItemList = pathItemGenerator(orderedFilteredVisitMapByDays);
 			
+			if(pathItemList.size() > 0){
+				System.out.println();
+			}
 
 			// step 7: store them into the db
 			StorePathItems(pathItemList);
@@ -185,50 +192,12 @@ public class PathExtractor {
 			}
 		}
 	}
-
-	private List<Path> generateStorePathItem(
-			Map<String, List<Visit>> orderedFilteredVisitMapByDays) {
-		List<Path> pathItemList = new ArrayList<Path>();
-		Iterator<String> it = orderedFilteredVisitMapByDays.keySet().iterator();
-		while (it.hasNext()) {
-			String dayKey = it.next();
-			List<Visit> visitList = orderedFilteredVisitMapByDays.get(dayKey);
-			int npPlaces = visitList.size();
-			String path = "";
-			int pathLength = 0;
-			boolean isFullPath;
-			for (Visit v : visitList) {
-				isFullPath = false;
-				String user_id = v.getUser_id();
-				path = path + "," + v.getPoiid();
-				pathLength++;
-				if (pathLength == npPlaces) {
-					isFullPath = true;
-				}
-				if (path.startsWith(",")) {
-					// ",xxxx,tttt,yyyy" to "xxxx,tttt,yyyy"
-					path = path.substring(1);
-				}
-				String checksum = "";
-				try {
-					checksum = DataProcessUtils.makeSHA1Hash(path);
-				} catch (NoSuchAlgorithmException e) {
-					e.printStackTrace();
-				} catch (UnsupportedEncodingException e) {
-					e.printStackTrace();
-				}
-
-				Path pathItem = new Path(user_id, dayKey, checksum, pathLength,
-						path, isFullPath);
-				pathItemList.add(pathItem);
-			}
-		}
-		return pathItemList;
-	}
 	
 	
 	private List<Path> pathItemGenerator(
 			Map<String, List<Visit>> orderedFilteredVisitMapByDays) {
+		
+		storeList = new ArrayList<Path>();
 		List<Path> pathItemList = new ArrayList<Path>();
 		
 		Iterator<String> it = orderedFilteredVisitMapByDays.keySet().iterator();
@@ -242,42 +211,52 @@ public class PathExtractor {
 				que.add(v);
 			}
 			
-			List<Path> simplePathItemList = pathItemCalculator(que);
+			if(npPlaces >= 4){
+				System.out.println("Debug.");
+			}
 			
-			for(Path p: simplePathItemList){
+			pathItemCalculator(que);
+			
+			for(Path p: storeList){
 				p.setDay(dayKey);
 				if (p.getPath_length() == npPlaces) {
 					p.setIs_full_path(true);
 				}
 				pathItemList.add(p);
+				System.out.println();
+				System.out.println("Overview:");
+				System.out.println(p.getDay() +" "+ p.getPath());
+				System.out.println();
 			}
 		}
-		
 		
 		return pathItemList;
 	}
 
+	
 	private List<Path> pathItemCalculator(Queue<Visit> que) {
 		List<Path> CombinedPathItemList = new ArrayList<Path>();
-		List<Path> pathItemList = new ArrayList<Path>();;
-		Visit visit = que.poll();
-		CombinedPathItemList.add(new Path(visit));
-		if(!que.isEmpty()){
+		List<Path> pathItemList = new ArrayList<Path>();
+		if (!que.isEmpty()) {
+			Visit visit = que.poll();
+			Path singlePath = new Path(visit);
+			storeList.add(singlePath);
+//			System.out.println("store: "+singlePath.getPath());
+			CombinedPathItemList.add(new Path(visit));
+
 			pathItemList = pathItemCalculator(que);
-			
-			for(Path p: pathItemList){
-				if(p.getPath_length()>1){
-					CombinedPathItemList.add(p);
-				}
-				Path combinePath = new Path(p, visit);
+
+			for (Path p : pathItemList) {
+
+				Path combinePath = new Path(visit, p); // v + p
+				storeList.add(combinePath);
+//				System.out.println("store: "+ combinePath.getPath());
 				CombinedPathItemList.add(combinePath);
 			}
 		}
-		
+
 		return CombinedPathItemList;
 	}
-	
-	
 
 	private void StorePathItems(List<Path> list) {
 		if (list.size() < 1) {
@@ -286,7 +265,7 @@ public class PathExtractor {
 
 		String sql = "insert into "
 				+ this.pathTableName
-				+ " (user_id, day, checksum, path, path_length, is_full_path) values (?,?,?,?,?,?)";
+				+ " (user_id, day, day_oy, checksum, post_path, poi_path, path_length, is_full_path) values (?,?,?,?,?,?,?,?)";
 		System.out.println(sql);
 		try {
 			PreparedStatement inserPoiListPs = con.prepareStatement(sql);
@@ -295,10 +274,12 @@ public class PathExtractor {
 				try {
 					inserPoiListPs.setString(1, p.getUser_id());
 					inserPoiListPs.setString(2, p.getDay());
-					inserPoiListPs.setString(3, p.getChecksum());
-					inserPoiListPs.setString(4, p.getPath());
-					inserPoiListPs.setInt(5, p.getPath_length());
-					inserPoiListPs.setBoolean(6, p.isIs_full_path());
+					inserPoiListPs.setDouble(3, p.getDoy_oy());
+					inserPoiListPs.setString(4, p.getChecksum());
+					inserPoiListPs.setString(5, p.getPostPath());
+					inserPoiListPs.setString(6, p.getPath());
+					inserPoiListPs.setInt(7, p.getPath_length());
+					inserPoiListPs.setBoolean(8, p.isIs_full_path());
 					inserPoiListPs.executeUpdate();
 				} catch (SQLException e) {
 					if (e.getMessage() != null

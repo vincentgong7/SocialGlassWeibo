@@ -9,14 +9,16 @@ public class Visit {
 	private long timestamp = 0L;
 	private Date date = null;
 	private String day = "";
+	private double day_oy = 0d;
 	
 	public Visit(String post_id, String user_id, String poiid,
-			Long timestamp) {
+			Long timestamp, double day_oy) {
 		// TODO Auto-generated constructor stub
 		this.post_id = post_id;
 		this.user_id = user_id;
 		this.poiid = poiid;
 		this.timestamp = timestamp;
+		this.day_oy = day_oy;
 	}
 	
 	public String getPost_id() {
@@ -54,5 +56,13 @@ public class Visit {
 	}
 	public void setDay(String day) {
 		this.day = day;
+	}
+
+	public double getDay_oy() {
+		return day_oy;
+	}
+
+	public void setDay_oy(double day_oy) {
+		this.day_oy = day_oy;
 	}
 }

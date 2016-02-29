@@ -8,12 +8,13 @@ import mt.weibo.db.MyDB;
 
 public class Gyration {
 
-	private String user_in_scope_tablename = "socialmedia.user_in_scope";
+	private String user_in_scope_tablename = "socialmedia.user_in_scope_gyration";
 	private String post_in_scope_tablename = "socialmedia.post_in_scope";
+	private String dbname = "shenzhen";
 
-	public Gyration(int port) {
+	public Gyration(String dbname, int port) {
 		// TODO Auto-generated constructor stub
-		MyDB.init(port);
+		MyDB.init(port, dbname);
 	}
 
 	public static void main(String[] args) {
@@ -22,7 +23,7 @@ public class Gyration {
 		if (args.length > 0) {
 			port = Integer.valueOf(args[0]);
 		}
-		Gyration gyration = new Gyration(port);
+		Gyration gyration = new Gyration("shenzhen", port);
 		gyration.process();
 	}
 
@@ -34,7 +35,7 @@ public class Gyration {
 		ResultSet userRS;
 		try {
 			userRS = MyDB.queryUpdate("Select * from "
-					+ user_in_scope_tablename + " where gyration = 0");
+					+ user_in_scope_tablename + " where gyration = -1");
 			while (userRS.next()) {
 				times++;
 				String userID = userRS.getString("user_id");
@@ -76,7 +77,6 @@ public class Gyration {
 				pointsRS.close();
 
 				double gyration = Math.sqrt(sum / count);
-				;
 				System.out.println("times = " + times + ", count = " + count
 						+ ", gyration = " + gyration);
 				userRS.updateDouble("gyration", gyration);
